@@ -178,7 +178,7 @@ extrinsicTranslation: !!opencv-matrix
      rosbag play 0117-1525.bag 
      ```
 
-     <p align='center'>    <img src="./doc/ljj.png" alt="drawing" width="600"/></p>
+     <p align='center'>    <img src="./doc/ljj.gif" alt="drawing" width="1000"/></p>
 
 ---
 
