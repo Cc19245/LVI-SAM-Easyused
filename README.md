@@ -2,6 +2,10 @@
 
 This repository contains modified code of [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) for easier using. 
 
+<p align='center'>
+    <img src="./doc/cover-ljj.gif" alt="drawing" width="800"/>
+</p>
+
 ---
 
 
@@ -178,7 +182,7 @@ extrinsicTranslation: !!opencv-matrix
      rosbag play 0117-1525.bag 
      ```
 
-     <p align='center'>    <img src="./doc/ljj.gif" alt="drawing" width="1000"/></p>
+     <p align='center'>    <img src="./doc/ljj.gif" alt="drawing" width="800"/></p>
 
 ---
 
