@@ -33,7 +33,7 @@ add_definitions(-DIF_OFFICIAL=0)
 
 ## Params config
 
-1. `params_camera.yaml`: set the VIO params, especially for $T\_imu\_camera$. It's same as VINS-Mono.
+1. `params_camera.yaml`: set the VIO params, especially for **T_imu\_camera**. It's same as VINS-Mono.
 
 ```yaml
 ###################### extrinsic between IMU and Camera  ###########################
@@ -54,7 +54,7 @@ extrinsicTranslation: !!opencv-matrix
    data: [0.006422381632411965, 0.019939800449065116, 0.03364235163589248]
 ```
 
-2. `params_lidar.yaml`: set the LIO params, especially for $T\_imu\_lidar$. 
+2. `params_lidar.yaml`: set the LIO params, especially for **T_imu_lidar**. 
 
 ```yaml
   ###################### extrinsic between IMU and LiDAR  ###########################
