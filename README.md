@@ -38,6 +38,8 @@ add_definitions(-DIF_OFFICIAL=0)
 
 ## Params config
 
+### Sensors extrinsic config
+
 1. `params_camera.yaml`: set the VIO params, especially for **T_imu\_camera**. It's same as VINS-Mono.
 
 ```yaml
@@ -72,7 +74,9 @@ extrinsicTranslation: !!opencv-matrix
                                          0,    0,   -1]
 ```
 
-**Besides**, due to the special IMU (the Euler angle coordinate system is different from the angular velocity and angular velocity coordinate system) of official dataset , you also need to set which axis the IMU rotates around counterclockwise to get a positive output. For official sensor equipment, it is set as follows.
+### IMU property config
+
+Due to the special IMU (the Euler angle coordinate system is different from the angular velocity and angular velocity coordinate system) of official dataset , you also need to set which axis the IMU rotates around counterclockwise to get a positive output. For official sensor equipment, it is set as follows.
 
 ```yaml
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
@@ -87,7 +91,6 @@ extrinsicTranslation: !!opencv-matrix
 <p align='center'>
     <img src="./doc/official-equipment.png" alt="drawing" width="600"/>
 </p>
-
 ==**Note**==: **For most of the IMUs, the Euler angle coordinate system is same as the angular velocity and angular velocity coordinate system**. So the above parameters should be set as follows.
 
 ```yaml
@@ -174,6 +177,26 @@ extrinsicTranslation: !!opencv-matrix
 
      <p align='center'>    <img src="./doc/urbannav.gif" alt="drawing" width="600"/></p>
 
+3. KITTI Dataset
+
+   - Run the launch file:
+
+     ```
+     roslaunch lvi_sam backbag.launch
+     ```
+
+   - Play existing bag files. If you want to use KITTI dataset, you need to get rosbag files firstly. You can get it refer to [LIO-SAM/config/doc/kitti2bag](https://github.com/TixiaoShan/LIO-SAM/tree/master/config/doc/kitti2bag). Here we use KITTI_2011_09_26_drive_0084_synced raw data to get rosbag file. The transformed rosbag file can get at [this link](https://1drv.ms/u/s!AqYajE_ft9lwg0tuhqyZqd4MUjqp?e=hnvkZo).
+
+     ```
+     rosbag play kitti_2011_09_26_drive_0084_synced.bag  
+     ```
+
+   - Results of our's modified code on kitti_2011_09_26_drive_0084_synced.bag:
+
+     <p align='center'>
+         <img src="./doc/kitti.gif" alt="drawing" width="600"/>
+     </p>
+
 3. [My test dataset](https://1drv.ms/u/s!AqYajE_ft9lwg0paJQu_DRzU-GQ5?e=A95yfn)
 
    - Run the launch file:
@@ -209,7 +232,7 @@ extrinsicTranslation: !!opencv-matrix
 
 ## TODO
 
-  - [ ] More test on different dataset, e.g. KITTI, KAIST. **However**, these datasets' lidar data have no **ring** information. So LVI-SAM can't run directly. If you want to run on these datasets, you need to modifidy the code to add this information refer to [LeGO-LOAM](https://github.com/RobustFieldAutonomyLab/LeGO-LOAM).
+  - [ ] More test on different dataset, e.g. KAIST. **However**, these datasets' lidar data have no **ring** information. So LVI-SAM can't run directly. If you want to run on these datasets, you need to modifidy the code to add this information refer to [LeGO-LOAM](https://github.com/RobustFieldAutonomyLab/LeGO-LOAM).
 
 ---
 
