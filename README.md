@@ -6,6 +6,7 @@ This repository contains modified code of [LVI-SAM](https://github.com/TixiaoSha
     <img src="./doc/cover-ljj.gif" alt="drawing" width="800"/>
 </p>
 
+
 ---
 
 
@@ -84,10 +85,10 @@ extrinsicTranslation: !!opencv-matrix
 ```
 
 <p align='center'>
-    <img src="./doc/official-equipment.png" alt="drawing" width="800"/>
+    <img src="./doc/official-equipment.png" alt="drawing" width="600"/>
 </p>
 
-**However**, for most of the IMUs, the Euler angle coordinate system is same as the angular velocity and angular velocity coordinate system. So the above parameters should be set as follows.
+==**Note**==: **For most of the IMUs, the Euler angle coordinate system is same as the angular velocity and angular velocity coordinate system**. So the above parameters should be set as follows.
 
 ```yaml
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
@@ -155,6 +156,24 @@ extrinsicTranslation: !!opencv-matrix
          <img src="./doc/gate_01.png" alt="drawing" width="600"/>
      </p>
 
+3. [UrbanNavDataset](https://github.com/weisongwen/UrbanNavDataset)
+
+   - Run the launch file:
+
+     ```
+     roslaunch lvi_sam UrbanNavDataset.launch
+     ```
+
+   - Play existing bag files, the params we provided is for [UrbanNav-HK-Data20200314](https://www.dropbox.com/s/3mtlncglrv7p39l/2020-03-14-16-45-35.bag.tar.gz?dl=0). If you use other bag files of UrbanNavDataset, please check if the params need to be changed.
+
+     ```
+     rosbag play 2020-03-14-16-45-35.bag 
+     ```
+
+   - Results on UrbanNav-HK-Data20200314:
+
+     <p align='center'>    <img src="./doc/urbannav.gif" alt="drawing" width="600"/></p>
+
 3. [My test dataset](https://1drv.ms/u/s!AqYajE_ft9lwg0paJQu_DRzU-GQ5?e=A95yfn)
 
    - Run the launch file:
@@ -175,14 +194,14 @@ extrinsicTranslation: !!opencv-matrix
          <img src="./doc/backbag.png" alt="drawing" width="600"/>
      </p>
 
-   - Results of our's modified code on 0117-1525.bag (Due to privacy issues, this data package is not open source):
+   - Results of our's modified code on our self 0117-1525.bag (Device is not same as backbag.bag, so it has another params. However, sorry for privacy issues, this data package can not open source):
 
      ```
      roslaunch lvi_sam ljj.launch
      rosbag play 0117-1525.bag 
      ```
 
-     <p align='center'>    <img src="./doc/ljj.gif" alt="drawing" width="800"/></p>
+     <p align='center'>    <img src="./doc/ljj.gif" alt="drawing" width="600"/></p>
 
 ---
 
