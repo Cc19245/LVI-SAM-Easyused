@@ -1,8 +1,11 @@
 # LVI-SAM-Easyused
 
-This repository contains modified code of [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) for easier using. 
+This repository contains modified code of [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) for easier using. The test video on many datasets is available on **YouTube** (click below images to open) and [**Bilibili**](https://www.bilibili.com/video/BV1jv4y1Q7zr/?vd_source=1363e3b30e51ca9984f82492949f865b).
 
-<iframe src="//player.bilibili.com/player.html?aid=563927695&bvid=BV1jv4y1Q7zr&cid=927770010&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+<div align="center">
+<a href="https://youtu.be/kty_oOBuyCY" target="_blank"><img src="./doc/handheld.png" alt="video" width="80%" /></a>
+</div>
+
 
 ---
 
@@ -86,8 +89,9 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 ```
 
 <p align='center'>
-    <img src="./doc/official-equipment.png" alt="drawing" width="600"/>
+    <img src="./doc/official-equipment.png" alt="drawing" width="700"/>
 </p>
+
 ==**Note**==: **For most of the IMUs, the Euler angle coordinate system is same as the angular velocity and angular velocity coordinate system**. So the above parameters should be set as follows.
 
 ```yaml
