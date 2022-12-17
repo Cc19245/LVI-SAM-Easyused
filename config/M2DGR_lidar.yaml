@@ -27,11 +27,7 @@ lvi_sam:
   imuGyrBiasN: 1.4428407712885209e-05
   imuGravity: 9.805
   
-  # Extrinsics (lidar -> IMU)
-  extrinsicTrans: [0.27255, -0.00053,0.17954]
-  extrinsicRot: [1, 0, 0, 0, 1, 0, 0, 0, 1]
-  extrinsicRPY: [1, 0, 0, 0, 1, 0, 0, 0, 1]
-
+  
   ###################### extrinsic between IMU and LiDAR  ###########################
   ###################### T_IMU_LiDAR, LiDAR -> IMU       ###########################
   extrinsicTranslation: [0.27255, -0.00053,0.17954]    

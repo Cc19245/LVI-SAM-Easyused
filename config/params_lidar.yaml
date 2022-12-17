@@ -27,6 +27,7 @@ lvi_sam:
   imuGyrBiasN: 3.5640318696367613e-05
   imuGravity: 9.80511
   
+  
   ###################### extrinsic between IMU and LiDAR  ###########################
   ###################### T_IMU_LiDAR, LiDAR -> IMU       ############################
   extrinsicTranslation: [0.0, 0.0, 0.0]    

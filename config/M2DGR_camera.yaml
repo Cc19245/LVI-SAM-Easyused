@@ -13,20 +13,6 @@ use_lidar: 1                     # whether use depth info from lidar or not
 lidar_skip: 3                    # skip this amount of scans
 align_camera_lidar_estimation: 1 # align camera and lidar estimation for visualization
 
-# lidar to camera extrinsic
-lidar_to_cam_tx: 0.27255
-lidar_to_cam_ty: -0.00053
-lidar_to_cam_tz: 0.17954
-lidar_to_cam_rx: 0.0
-lidar_to_cam_ry: 0.0
-lidar_to_cam_rz: 0.0
-
-# extrinsicRPY: !!opencv-matrix
-#    rows: 3
-#    cols: 1
-#    dt: d
-#    data: [1,0,0,0,1,0,0,0,1]
-
 # camera model
 model_type: PINHOLE
 camera_name: camera
@@ -72,6 +58,7 @@ extrinsicTranslation: !!opencv-matrix
    cols: 1
    dt: d
    data: [0.57711, -0.00012, 0.83333]
+
 
 #feature traker paprameters
 max_cnt: 150            # max feature number in feature tracking
