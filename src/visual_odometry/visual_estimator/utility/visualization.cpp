@@ -157,7 +157,8 @@ void pubLatestOdometry(const Eigen::Vector3d &P, const Eigen::Quaterniond &Q,
             {
             #if IF_OFFICIAL
                 tf::StampedTransform trans_odom_baselink;
-                listener.lookupTransform("odom", "base_link", ros::Time(0), trans_odom_baselink);
+                listener.lookupTransform("odom","base_link", ros::Time(0), trans_odom_baselink);
+                t_odom_world = transformConversion(trans_odom_baselink) * transformConversion(trans_world_vinsbody_ros).inverse();
                 last_align_time = header.stamp.toSec();
             #else
                 //; 计算odom坐标系和vins_world之间的变换关系，这个变换是会变化的，因为vins不准确存在漂移，

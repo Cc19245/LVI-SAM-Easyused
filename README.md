@@ -2,10 +2,7 @@
 
 This repository contains modified code of [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) for easier using. 
 
-<p align='center'>
-    <img src="./doc/cover-ljj.gif" alt="drawing" width="800"/>
-</p>
-
+<iframe src="//player.bilibili.com/player.html?aid=563927695&bvid=BV1jv4y1Q7zr&cid=927770010&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
 
 ---
 
