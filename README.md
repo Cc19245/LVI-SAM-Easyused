@@ -102,6 +102,9 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
   # 绕着哪个轴逆时针转动，输出roll角度为正(which axis the IMU rotates around counterclockwise to get a positive roll angle)
   rollAxis: "+x"    
 ```
+<p align='center'>
+    <img src="./doc/imu.png" alt="drawing" width="500"/>
+</p>
 
 ---
 
