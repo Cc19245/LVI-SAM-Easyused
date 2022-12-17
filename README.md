@@ -182,7 +182,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
    - Run the launch file:
 
      ```
-     roslaunch lvi_sam backbag.launch
+     roslaunch lvi_sam KITTI.launch
      ```
 
    - Play existing bag files. If you want to use KITTI dataset, you need to get rosbag files firstly. You can get it refer to [LIO-SAM/config/doc/kitti2bag](https://github.com/TixiaoShan/LIO-SAM/tree/master/config/doc/kitti2bag). Here we use KITTI_2011_09_26_drive_0084_synced raw data to get rosbag file. The transformed rosbag file can get at [this link](https://1drv.ms/u/s!AqYajE_ft9lwg0tuhqyZqd4MUjqp?e=hnvkZo).
