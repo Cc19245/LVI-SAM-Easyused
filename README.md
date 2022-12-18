@@ -222,7 +222,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
          <img src="./doc/backbag.png" alt="drawing" width="600"/>
      </p>
 
-   - Results of our's modified code on our own 0117-1525.bag (Device is not same as backbag.bag, so it has another params. However, sorry for privacy issues, this data package can not open source):
+   - Results of our's modified code on our own 0117-1525.bag (Device is different from backbag.bag, so it has another params. However, sorry for privacy issues, this data package can not open source):
 
      ```
      roslaunch lvi_sam ljj.launch
