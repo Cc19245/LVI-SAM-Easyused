@@ -91,8 +91,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 <p align='center'>
     <img src="./doc/official-equipment.png" alt="drawing" width="700"/>
 </p>
-
-==**Note**==: **For most of the IMUs, the Euler angle coordinate system is same as the angular velocity and angular velocity coordinate system**. So the above parameters should be set as follows.
+**Note**: **For most of the IMUs, the Euler angle coordinate system is same as the angular velocity and angular velocity coordinate system**. So the above parameters should be set as follows.
 
 ```yaml
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
@@ -179,9 +178,9 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 
    - Results on UrbanNav-HK-Data20200314:
 
-     <p align='center'>    <img src="./doc/urbannav.gif" alt="drawing" width="600"/></p>
+     <p align='center'>    <img src="./doc/urbannav.png" alt="drawing" width="600"/></p>
 
-3. KITTI Dataset
+3. [KITTI raw dataset](https://www.cvlibs.net/datasets/kitti/raw_data.php)
 
    - Run the launch file:
 
@@ -189,7 +188,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
      roslaunch lvi_sam KITTI.launch
      ```
 
-   - Play existing bag files. If you want to use KITTI dataset, you need to get rosbag files firstly. You can get it refer to [LIO-SAM/config/doc/kitti2bag](https://github.com/TixiaoShan/LIO-SAM/tree/master/config/doc/kitti2bag). Here we use KITTI_2011_09_26_drive_0084_synced raw data to get rosbag file. The transformed rosbag file can get at [this link](https://1drv.ms/u/s!AqYajE_ft9lwg0tuhqyZqd4MUjqp?e=hnvkZo).
+   - Play existing bag files. Please note that you must use **KITTI raw dataset** rather than KITTI Odometry dataset, because the latter's IMU frequency is too low. If you want to use KITTI raw dataset for LVI-SAM, you need to get rosbag files firstly. You can get it refer to [LIO-SAM/config/doc/kitti2bag](https://github.com/TixiaoShan/LIO-SAM/tree/master/config/doc/kitti2bag). Here we use KITTI_2011_09_26_drive_0084_synced raw data to get rosbag file. The transformed rosbag file can get at [this link](https://1drv.ms/u/s!AqYajE_ft9lwg0tuhqyZqd4MUjqp?e=hnvkZo).
 
      ```
      rosbag play kitti_2011_09_26_drive_0084_synced.bag  
@@ -198,7 +197,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
    - Results of our's modified code on kitti_2011_09_26_drive_0084_synced.bag:
 
      <p align='center'>
-         <img src="./doc/kitti.gif" alt="drawing" width="600"/>
+         <img src="./doc/kitti.png" alt="drawing" width="600"/>
      </p>
 
 3. [My test dataset](https://1drv.ms/u/s!AqYajE_ft9lwg0paJQu_DRzU-GQ5?e=A95yfn)
@@ -221,7 +220,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
          <img src="./doc/backbag.png" alt="drawing" width="600"/>
      </p>
 
-   - Results of our's modified code on our self 0117-1525.bag (Device is not same as backbag.bag, so it has another params. However, sorry for privacy issues, this data package can not open source):
+   - Results of our's modified code on our own 0117-1525.bag (Device is not same as backbag.bag, so it has another params. However, sorry for privacy issues, this data package can not open source):
 
      ```
      roslaunch lvi_sam ljj.launch
@@ -244,7 +243,8 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 
 ## Notes
 
-If you want to know what changes I made and why they make sense, you can refer to my blog: [LVI-SAM坐标系外参分析与代码修改，以适配各种数据集](https://blog.csdn.net/qq_42731705/article/details/128344179).
+- This code just modified the  extrinsic config of LVI-SAM for easier using. Its purpose is to allow you to adapt to other datasets and your own devices faster. So it does not modify the algorithm part of LVI-SAM.
+- If you want to know what changes I made and why they make sense, you can refer to my blog: [LVI-SAM坐标系外参分析与代码修改，以适配各种数据集](https://blog.csdn.net/qq_42731705/article/details/128344179).
 
 ---
 
