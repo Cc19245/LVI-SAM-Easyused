@@ -89,8 +89,9 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 ```
 
 <p align='center'>
-    <img src="./doc/official-equipment.png" alt="drawing" width="700"/>
+    <img src="./doc/official-equipment.png" alt="drawing" width="500"/>
 </p>
+
 ==Note==:  **For most of the IMUs, the Euler angle coordinate system is same as the angular velocity and angular velocity coordinate system**. So the above parameters should be set as follows.
 
 ```yaml
@@ -103,8 +104,9 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
   rollAxis: "+x"    
 ```
 <p align='center'>
-    <img src="./doc/imu.png" alt="drawing" width="500"/>
+    <img src="./doc/imu.png" alt="drawing" width="300"/>
 </p>
+
 
 ---
 
