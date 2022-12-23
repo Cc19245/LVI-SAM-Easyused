@@ -76,7 +76,7 @@ extrinsicTranslation: !!opencv-matrix
 
 ### IMU property config
 
-Due to the special IMU (the Euler angle coordinate system is different from the angular velocity and angular velocity coordinate system) of official dataset , you also need to set which axis the IMU rotates around counterclockwise to get a positive output. For official sensor equipment, it is set as follows.
+Due to the special IMU (the Euler angle coordinate system is different from the acceleration and angular velocity coordinate system) of official dataset , you also need to set which axis the IMU rotates around counterclockwise to get a positive output. For official sensor equipment, it is set as follows.
 
 ```yaml
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
@@ -92,7 +92,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
     <img src="./doc/official-equipment.png" alt="drawing" width="500"/>
 </p>
 
-**Note**:   **For most of the IMUs, the Euler angle coordinate system is same as the angular velocity and angular velocity coordinate system**. So the above parameters should be set as follows.
+**Note**:   **For most of the IMUs, the Euler angle coordinate system is same as the acceleration and angular velocity coordinate system**. So the above parameters should be set as follows.
 
 ```yaml
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
