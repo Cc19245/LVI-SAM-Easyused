@@ -82,7 +82,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
   # 绕着哪个轴逆时针转动，输出yaw角度为正(which axis the IMU rotates around counterclockwise to get a positive yaw angle)
   yawAxis: "-z"  
-  # 绕着哪个轴逆时针转动，输出pitch角度为正(which axis the IMU rotates counterclockwise to get a positive pitch angle)
+  # 绕着哪个轴逆时针转动，输出pitch角度为正(which axis the IMU rotates around counterclockwise to get a positive pitch angle)
   pitchAxis: "+x"    
   # 绕着哪个轴逆时针转动，输出roll角度为正(which axis the IMU rotates around counterclockwise to get a positive roll angle)
   rollAxis: "+y"    
@@ -98,7 +98,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
   # 绕着哪个轴逆时针转动，输出yaw角度为正(which axis the IMU rotates around counterclockwise to get a positive yaw angle)
   yawAxis: "+z"  
-  # 绕着哪个轴逆时针转动，输出pitch角度为正(which axis the IMU rotates counterclockwise to get a positive pitch angle)
+  # 绕着哪个轴逆时针转动，输出pitch角度为正(which axis the IMU rotates around counterclockwise to get a positive pitch angle)
   pitchAxis: "+y"    
   # 绕着哪个轴逆时针转动，输出roll角度为正(which axis the IMU rotates around counterclockwise to get a positive roll angle)
   rollAxis: "+x"    
