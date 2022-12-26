@@ -241,7 +241,7 @@ void lidar_callback(const sensor_msgs::PointCloud2ConstPtr& laser_msg)
         listener.waitForTransform("vins_world", "vins_body_ros", laser_msg->header.stamp, ros::Duration(0.01));
         listener.lookupTransform("vins_world", "vins_body_ros", laser_msg->header.stamp, transform);
     #else   
-        //? mod: 直接监听T_vinsworld_imu 
+        //? mod: 监听T_vinsworld_cameraFLU 和 T_cameraFLU_imu
         listener.waitForTransform("vins_world", "vins_cameraFLU", laser_msg->header.stamp, ros::Duration(0.01));
         listener.lookupTransform("vins_world", "vins_cameraFLU", laser_msg->header.stamp, transform_world_cFLU);
         listener.waitForTransform("vins_cameraFLU", "vins_body_imuhz", laser_msg->header.stamp, ros::Duration(0.01));
