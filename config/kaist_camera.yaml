@@ -11,7 +11,7 @@ point_cloud_topic: "lvi_sam/lidar/deskew/cloud_deskewed"
 # Lidar Params
 use_lidar: 1                     # whether use depth info from lidar or not
 lidar_skip: 3                    # skip this amount of scans
-align_camera_lidar_estimation: 0 # align camera and lidar estimation for visualization
+align_camera_lidar_estimation: 1 # align camera and lidar estimation for visualization
       
 #camera calibration 
 model_type: PINHOLE

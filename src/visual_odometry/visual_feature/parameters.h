@@ -93,12 +93,7 @@ extern double L_C_RX;
 extern double L_C_RY;
 extern double L_C_RZ;
 #else
-extern double t_imu_lidar_x;
-extern double t_imu_lidar_y;
-extern double t_imu_lidar_z;
-extern double R_imu_lidar_rx;
-extern double R_imu_lidar_ry;
-extern double R_imu_lidar_rz;
+extern tf::Transform Transform_imu_lidar;
 #endif 
 
 void readParameters(ros::NodeHandle &n);

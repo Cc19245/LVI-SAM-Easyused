@@ -33,10 +33,15 @@ lvi_sam:
   extrinsicRotation: [9.999976e-01, -7.854027e-04, 2.024406e-03,
                       7.553071e-04,  9.998898e-01, 1.482454e-02,
                      -2.035826e-03, -1.482298e-02, 9.998881e-01]
-  # 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x"
-  yawAxis: "+z"      # 绕着哪个轴逆时针转动，输出yaw角度为正
-  pitchAxis: "+y"    # 绕着哪个轴逆时针转动，输出pitch角度为正
-  rollAxis: "+x"     # 绕着哪个轴逆时针转动，输出roll角度为正
+
+  ########################## IMU property config  ###########################
+  ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
+  # 绕着哪个轴逆时针转动，输出yaw角度为正(which axis the IMU rotates around counterclockwise to get a positive yaw angle)
+  yawAxis: "+z"  
+  # 绕着哪个轴逆时针转动，输出pitch角度为正(which axis the IMU rotates around counterclockwise to get a positive pitch angle)
+  pitchAxis: "+y"    
+  # 绕着哪个轴逆时针转动，输出roll角度为正(which axis the IMU rotates around counterclockwise to get a positive roll angle)
+  rollAxis: "+x"
 
 
   # LOAM feature threshold

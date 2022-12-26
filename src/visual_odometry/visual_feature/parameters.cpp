@@ -33,12 +33,7 @@ double L_C_RZ;
 //? mod: lidar -> imu外参
 // [R_imu_lidar, t_imu_lidar;
 //         0,          1    ]
-double t_imu_lidar_x;
-double t_imu_lidar_y;
-double t_imu_lidar_z;
-double R_imu_lidar_rx;
-double R_imu_lidar_ry;
-double R_imu_lidar_rz;
+tf::Transform Transform_imu_lidar;
 #endif
 
 int USE_LIDAR;
@@ -120,22 +115,16 @@ void readParameters(ros::NodeHandle &n)
     Eigen::Vector3d t_imu_lidar = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(t_imu_lidar_V.data(), 3, 1);
     Eigen::Matrix3d R_tmp = Eigen::Map<const Eigen::Matrix<double, -1, -1, Eigen::RowMajor>>(R_imu_lidar_V.data(), 3, 3);
     ROS_ASSERT(abs(R_tmp.determinant()) > 0.9);   // 防止配置文件中写错，这里加一个断言判断一下
-    Eigen::Matrix3d R_imu_lidar = Eigen::Quaterniond(R_tmp).normalized().toRotationMatrix();
+    Eigen::Quaterniond Q_imu_lidar = Eigen::Quaterniond(R_tmp).normalized();
+    Eigen::Matrix3d R_imu_lidar = Q_imu_lidar.toRotationMatrix();
     
-    Eigen::Vector3d euler_angle = R_imu_lidar.eulerAngles(2, 1, 0);  // yaw pith roll
-    R_imu_lidar_rz = euler_angle(0);    // yaw
-    R_imu_lidar_ry = euler_angle(1);    // pitch
-    R_imu_lidar_rx = euler_angle(2);    // roll
-    t_imu_lidar_x = t_imu_lidar(0);  // xyz
-    t_imu_lidar_y = t_imu_lidar(1);
-    t_imu_lidar_z = t_imu_lidar(2);
+    Transform_imu_lidar = tf::Transform(tf::Quaternion(Q_imu_lidar.x(), Q_imu_lidar.y(), Q_imu_lidar.z(), Q_imu_lidar.w()), 
+        tf::Vector3(t_imu_lidar(0), t_imu_lidar(1), t_imu_lidar(2)));
 
     ROS_WARN_STREAM("=vins-feature_tracker read R_imu_lidar : =====================");
     std::cout << R_imu_lidar << std::endl;
-    ROS_WARN_STREAM("eulerAngles(yaw/pitch/roll, Z/Y/X) in rad : =====================");
-    std::cout << R_imu_lidar_rz << ", " << R_imu_lidar_ry << ", " << R_imu_lidar_rx << std::endl;
-    ROS_WARN_STREAM("=vins-feature_tracker read T_lidar_imu : =====================");
-    std::cout << t_imu_lidar_x  << ", " << t_imu_lidar_y << ", " << t_imu_lidar_z << std::endl;
+    ROS_WARN_STREAM("=vins-feature_tracker read t_lidar_imu : =====================");
+    std::cout << t_imu_lidar(0)  << ", " << t_imu_lidar(1) << ", " << t_imu_lidar(2) << std::endl;
 #endif
 
     usleep(100);

@@ -230,15 +230,22 @@ void lidar_callback(const sensor_msgs::PointCloud2ConstPtr& laser_msg)
 
     // 0. listen to transform
     static tf::TransformListener listener;
-    static tf::StampedTransform transform;
+#if IF_OFFICIAL
+    static tf::StampedTransform transform;   //; T_vinsworld_camera_FLU
+#else
+    static tf::StampedTransform transform_world_cFLU;   //; T_vinsworld_camera_FLU
+    static tf::StampedTransform transform_cFLU_imu;    //; T_cameraFLU_imu
+#endif
     try{
     #if IF_OFFICIAL
         listener.waitForTransform("vins_world", "vins_body_ros", laser_msg->header.stamp, ros::Duration(0.01));
         listener.lookupTransform("vins_world", "vins_body_ros", laser_msg->header.stamp, transform);
     #else   
         //? mod: 直接监听T_vinsworld_imu 
-        listener.waitForTransform("vins_world", "vins_body_imuhz", laser_msg->header.stamp, ros::Duration(0.01));
-        listener.lookupTransform("vins_world", "vins_body_imuhz", laser_msg->header.stamp, transform);
+        listener.waitForTransform("vins_world", "vins_cameraFLU", laser_msg->header.stamp, ros::Duration(0.01));
+        listener.lookupTransform("vins_world", "vins_cameraFLU", laser_msg->header.stamp, transform_world_cFLU);
+        listener.waitForTransform("vins_cameraFLU", "vins_body_imuhz", laser_msg->header.stamp, ros::Duration(0.01));
+        listener.lookupTransform("vins_cameraFLU", "vins_body_imuhz", laser_msg->header.stamp, transform_cFLU_imu);
     #endif
     } 
     catch (tf::TransformException ex){
@@ -247,11 +254,19 @@ void lidar_callback(const sensor_msgs::PointCloud2ConstPtr& laser_msg)
     }
 
     double xCur, yCur, zCur, rollCur, pitchCur, yawCur;
+#if IF_OFFICIAL
     xCur = transform.getOrigin().x();
     yCur = transform.getOrigin().y();
     zCur = transform.getOrigin().z();
     tf::Matrix3x3 m(transform.getRotation());
+#else
+    xCur = transform_world_cFLU.getOrigin().x();
+    yCur = transform_world_cFLU.getOrigin().y();
+    zCur = transform_world_cFLU.getOrigin().z();
+    tf::Matrix3x3 m(transform_world_cFLU.getRotation());
+#endif
     m.getRPY(rollCur, pitchCur, yawCur);
+    //; T_vinswolrd_cameraFLU
     Eigen::Affine3f transNow = pcl::getTransformation(xCur, yCur, zCur, rollCur, pitchCur, yawCur);
 
     // 1. convert laser cloud message to pcl
@@ -266,7 +281,29 @@ void lidar_callback(const sensor_msgs::PointCloud2ConstPtr& laser_msg)
     downSizeFilter.filter(*laser_cloud_in_ds);
     *laser_cloud_in = *laser_cloud_in_ds;
 
-    // 3. filter lidar points (only keep points in camera view)
+    // 3. 把lidar坐标系下的点云转到相机的FLU坐标系下表示，因为下一步需要使用相机FLU坐标系下的点云进行初步过滤
+#if IF_OFFICIAL
+    pcl::PointCloud<PointType>::Ptr laser_cloud_offset(new pcl::PointCloud<PointType>());
+    Eigen::Affine3f transOffset = pcl::getTransformation(L_C_TX, L_C_TY, L_C_TZ, L_C_RX, L_C_RY, L_C_RZ);
+    pcl::transformPointCloud(*laser_cloud_in, *laser_cloud_offset, transOffset);
+    *laser_cloud_in = *laser_cloud_offset;
+#else
+    pcl::PointCloud<PointType>::Ptr laser_cloud_offset(new pcl::PointCloud<PointType>());
+    //; T_cFLU_lidar
+    tf::Transform transform_cFLU_lidar = transform_cFLU_imu * Transform_imu_lidar;
+    double roll, pitch, yaw, x, y, z;
+    x = transform_cFLU_lidar.getOrigin().getX();
+    y = transform_cFLU_lidar.getOrigin().getY();
+    z = transform_cFLU_lidar.getOrigin().getZ();
+    tf::Matrix3x3(transform_cFLU_lidar.getRotation()).getRPY(roll, pitch, yaw);
+    Eigen::Affine3f transOffset = pcl::getTransformation(x, y, z, roll, pitch, yaw);
+    //; lidar本体坐标系下的点云，转到相机FLU坐标系下表示
+    pcl::transformPointCloud(*laser_cloud_in, *laser_cloud_offset, transOffset);
+    *laser_cloud_in = *laser_cloud_offset;
+#endif
+
+    // 4. filter lidar points (only keep points in camera view)
+    //; 根据已经转到相机FLU坐标系下的点云，先排除不在相机FoV内的点云
     pcl::PointCloud<PointType>::Ptr laser_cloud_in_filter(new pcl::PointCloud<PointType>());
     for (int i = 0; i < (int)laser_cloud_in->size(); ++i)
     {
@@ -276,26 +313,9 @@ void lidar_callback(const sensor_msgs::PointCloud2ConstPtr& laser_msg)
     }
     *laser_cloud_in = *laser_cloud_in_filter;
 
-    // TODO: transform to IMU body frame
-    // 4. offset T_lidar -> T_camera 
-#if IF_OFFICIAL
-    pcl::PointCloud<PointType>::Ptr laser_cloud_offset(new pcl::PointCloud<PointType>());
-    Eigen::Affine3f transOffset = pcl::getTransformation(L_C_TX, L_C_TY, L_C_TZ, L_C_RX, L_C_RY, L_C_RZ);
-#else
-    pcl::PointCloud<PointType>::Ptr laser_cloud_offset(new pcl::PointCloud<PointType>());
-    //? mod: lidar特征点直接转到IMU坐标系下，然后第5步通过T_vinsworld_imu转到vins的世界坐标系下存储
-    //; T_imu_lidar, 即 lidar -> imu的坐标变换
-    Eigen::Affine3f transOffset = pcl::getTransformation(t_imu_lidar_x, t_imu_lidar_y,
-        t_imu_lidar_z, R_imu_lidar_rx, R_imu_lidar_ry, R_imu_lidar_rz);
-#endif
-
-    //; lidar本体坐标系下的点云，转到imu坐标系下表示
-    pcl::transformPointCloud(*laser_cloud_in, *laser_cloud_offset, transOffset);
-    *laser_cloud_in = *laser_cloud_offset;
-
     // 5. transform new cloud into global odom frame
     pcl::PointCloud<PointType>::Ptr laser_cloud_global(new pcl::PointCloud<PointType>());
-    //; imu坐标系下的点云，转到vins的world系下表示
+    //; cameraFLU坐标系下的点云，转到vinsworld系下表示
     pcl::transformPointCloud(*laser_cloud_in, *laser_cloud_global, transNow);
 
     // 6. save new cloud

@@ -34,7 +34,7 @@ acc_n: 8.1330537434371481e-03          # accelerometer measurement noise standar
 gyr_n: 7.4266825125507141e-03         # gyroscope measurement noise standard deviation.     #0.05  0.004
 acc_w: 1.2123362494392119e-04        # accelerometer bias random work noise standard deviation.  #0.02
 gyr_w: 8.6572985145653080e-05       # gyroscope bias random work noise standard deviation.     #4.0e-5
-g_norm:  9.78785    # gravity magnitude
+g_norm: 9.78785    # gravity magnitude
 
 # Extrinsic parameter between IMU and Camera.
 estimate_extrinsic: 0   # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
