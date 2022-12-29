@@ -135,7 +135,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
      rosbag play handheld.bag 
      ```
 
-   - Results of origin official code (up fig) and our's modified code (down fig) on handheld.bag:
+   - Results of origin official code (up fig) and our modified code (down fig) on handheld.bag:
 
      <p align='center'>
          <img src="./doc/handheld-official.png" alt="drawing" width="600"/>
@@ -159,7 +159,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
      rosbag play gate_01.bag 
      ```
 
-   - Results of our's modified code on gate_01.bag:
+   - Results of our modified code on gate_01.bag:
 
      <p align='center'>
          <img src="./doc/gate_01.png" alt="drawing" width="600"/>
@@ -197,7 +197,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
      rosbag play kitti_2011_09_26_drive_0084_synced.bag  
      ```
 
-   - Results of our's modified code on kitti_2011_09_26_drive_0084_synced.bag:
+   - Results of our modified code on kitti_2011_09_26_drive_0084_synced.bag:
 
      <p align='center'>
          <img src="./doc/kitti.png" alt="drawing" width="600"/>
@@ -217,13 +217,13 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
      rosbag play backbag.bag 
      ```
 
-   - Results of our's modified code on backbag.bag:
+   - Results of our modified code on backbag.bag:
 
      <p align='center'>
          <img src="./doc/backbag.png" alt="drawing" width="600"/>
      </p>
 
-   - Results of our's modified code on our own 0117-1525.bag (Device is different from backbag.bag, so it has another params. However, sorry for privacy issues, this data package can not open source):
+   - Results of our modified code on our own 0117-1525.bag (Device is different from backbag.bag, so it has another params. However, sorry for privacy issues, this data package can not open source):
 
      ```
      roslaunch lvi_sam ljj.launch
