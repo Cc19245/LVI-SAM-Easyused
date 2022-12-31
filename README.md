@@ -246,9 +246,9 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 
 ## Notes
 
-- This code just modified the  extrinsic config of LVI-SAM for easier using. Its purpose is to allow you to adapt to other datasets and your own devices faster. So it does not modify the algorithm part of LVI-SAM.
+- This code just modified the  extrinsic config of LVI-SAM for easier using. Its purpose is to allow you to adapt to other datasets and your own devices faster. So it does **NOT** modify the algorithm part of LVI-SAM.
 - If you want to know what changes I made and why they make sense, you can refer to my blog: [LVI-SAM坐标系外参分析与代码修改，以适配各种数据集](https://blog.csdn.net/qq_42731705/article/details/128344179).
-
+- I made a Chinese comments of LVI-SAM's code at [LVI-SAM-CC_Comments](https://github.com/Cc19245/LVI-SAM-CC_Comments).
 ---
 
 
