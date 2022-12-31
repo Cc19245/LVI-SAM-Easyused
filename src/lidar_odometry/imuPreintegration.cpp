@@ -75,14 +75,14 @@ public:
     gtsam::Pose3 lidar2Imu = gtsam::Pose3(gtsam::Rot3(1, 0, 0, 0), gtsam::Point3(extTrans.x(), extTrans.y(), extTrans.z()));
 #else
     //? mod: 坐标系定义这里还是有一个细节问题
-    //; T_IL，但是其中旋转一定是单位帧，因为这里的IMU是已经转换到和LiDAR坐标轴xyz完全平行的形式了，所以只剩下旋转了。
-    //; 定义旋转到和LiDAR坐标轴完全平行、但是坐标系原点不变的IMU坐标系为IMUlidar, 那么这里要的其实是T_imulidar_lidar
+    //; T_imulidar_lidar，其中旋转一定是单位帧，因为这里的IMU是已经转换到和LiDAR坐标轴xyz完全平行的形式了，所以只剩下旋转了。
+    //; 定义旋转到和LiDAR坐标轴完全平行、但是坐标系原点不变的IMU坐标系为imulidar, 那么这里要的其实是T_imulidar_lidar
     //; 而配置文件中我们给的extTrans是T_imu_lidar的平移部分，即t_imu_lidar，所以这里还需要转换一步。
-    //; T_imu_imulidar = [R_imu_lidar, 0; 0 1], t_imu_lidar = [R_imu_lidar, t_imu_lidar; 0, 1]
+    //; T_imu_imulidar = [R_imu_lidar, 0; 0 1], T_imu_lidar = [R_imu_lidar, t_imu_lidar; 0, 1]
     //; T_imulidar_lidar = [I, R_lidar_imu*t_imu_lidar; 0, 1]
     Eigen::Vector3d t_imulidar_lidar = R_lidar_imu * t_imu_lidar;
     gtsam::Pose3 imu2Lidar = gtsam::Pose3(gtsam::Rot3(1, 0, 0, 0), gtsam::Point3(t_imulidar_lidar.x(), t_imulidar_lidar.y(), t_imulidar_lidar.z()));
-    //; T_LI, 同上
+    //; T_lidar_imulidar, 同上
     gtsam::Pose3 lidar2Imu = gtsam::Pose3(gtsam::Rot3(1, 0, 0, 0), gtsam::Point3(-t_imulidar_lidar.x(), -t_imulidar_lidar.y(), -t_imulidar_lidar.z()));
 #endif
 
