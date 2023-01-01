@@ -240,13 +240,9 @@ public:
     void freeCloudInfoMemory()
     {
         cloudInfo.startRingIndex.clear();
-        cloudInfo.startRingIndex.shrink_to_fit();
         cloudInfo.endRingIndex.clear();
-        cloudInfo.endRingIndex.shrink_to_fit();
         cloudInfo.pointColInd.clear();
-        cloudInfo.pointColInd.shrink_to_fit();
-        cloudInfo.pointRange.clear();
-        cloudInfo.pointRange.shrink_to_fit();
+        cloudInfo.pointRange.clear();  
     }
 
     void publishFeatureCloud()
@@ -254,8 +250,8 @@ public:
         // free cloud info memory
         freeCloudInfoMemory();
         // save newly extracted features
-        cloudInfo.cloud_corner  = publishCloud(&pubCornerPoints,  cornerCloud,  cloudHeader.stamp, "base_link");
-        cloudInfo.cloud_surface = publishCloud(&pubSurfacePoints, surfaceCloud, cloudHeader.stamp, "base_link");
+        cloudInfo.cloud_corner  = publishCloud(pubCornerPoints,  cornerCloud,  cloudHeader.stamp, lidarFrame);
+        cloudInfo.cloud_surface = publishCloud(pubSurfacePoints, surfaceCloud, cloudHeader.stamp, lidarFrame);
         // publish to mapOptimization
         pubLaserCloudInfo.publish(cloudInfo);
     }
@@ -264,7 +260,7 @@ public:
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "lidar");
+    ros::init(argc, argv, "lvi_sam");
 
     FeatureExtraction FE;
 
