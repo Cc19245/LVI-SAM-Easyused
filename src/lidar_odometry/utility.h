@@ -1,6 +1,7 @@
 #pragma once
 #ifndef _UTILITY_LIDAR_ODOMETRY_H_
 #define _UTILITY_LIDAR_ODOMETRY_H_
+#define PCL_NO_PRECOMPILE 
 
 #include <ros/ros.h>
 
@@ -59,6 +60,7 @@ using namespace std;
 
 typedef pcl::PointXYZI PointType;
 
+enum class SensorType { VELODYNE, OUSTER, LIVOX };
 
 class ParamServer
 {
@@ -75,6 +77,12 @@ public:
     string odomTopic;
     string gpsTopic;
 
+    //Frames
+    string lidarFrame;
+    string baselinkFrame;
+    string odometryFrame;
+    string mapFrame;
+
     // GPS Settings
     bool useImuHeadingInitialization;
     bool useGpsElevation;
@@ -85,11 +93,13 @@ public:
     bool savePCD;
     string savePCDDirectory;
 
-    // Velodyne Sensor Configuration: Velodyne
+    // Lidar Sensor Configuration
+    SensorType sensor;
     int N_SCAN;
     int Horizon_SCAN;
-    string timeField;
     int downsampleRate;
+    float lidarMinRange;
+    float lidarMaxRange;
 
     // IMU
     float imuAccNoise;
@@ -97,6 +107,7 @@ public:
     float imuAccBiasN;
     float imuGyrBiasN;
     float imuGravity;
+    float imuRPYWeight;
    
 
 #if IF_OFFICIAL
@@ -142,7 +153,8 @@ public:
     float surroundingKeyframeSearchRadius;
     
     // Loop closure
-    bool loopClosureEnableFlag;
+    bool  loopClosureEnableFlag;
+    float loopClosureFrequency;
     int   surroundingKeyframeSize;
     float historyKeyframeSearchRadius;
     float historyKeyframeSearchTimeDiff;
@@ -165,6 +177,11 @@ public:
         nh.param<std::string>(PROJECT_NAME + "/odomTopic", odomTopic, "odometry/imu");
         nh.param<std::string>(PROJECT_NAME + "/gpsTopic", gpsTopic, "odometry/gps");
 
+        nh.param<std::string>(PROJECT_NAME + "/lidarFrame", lidarFrame, "base_link");
+        nh.param<std::string>(PROJECT_NAME + "/baselinkFrame", baselinkFrame, "base_link");
+        nh.param<std::string>(PROJECT_NAME + "/odometryFrame", odometryFrame, "odom");
+        nh.param<std::string>(PROJECT_NAME + "/mapFrame", mapFrame, "map");
+
         nh.param<bool>(PROJECT_NAME + "/useImuHeadingInitialization", useImuHeadingInitialization, false);
         nh.param<bool>(PROJECT_NAME + "/useGpsElevation", useGpsElevation, false);
         nh.param<float>(PROJECT_NAME + "/gpsCovThreshold", gpsCovThreshold, 2.0);
@@ -173,16 +190,39 @@ public:
         nh.param<bool>(PROJECT_NAME + "/savePCD", savePCD, false);
         nh.param<std::string>(PROJECT_NAME + "/savePCDDirectory", savePCDDirectory, "/tmp/loam/");
 
+        std::string sensorStr;
+        nh.param<std::string>(PROJECT_NAME + "/sensor", sensorStr, "");
+        if (sensorStr == "velodyne")
+        {
+            sensor = SensorType::VELODYNE;
+        }
+        else if (sensorStr == "ouster")
+        {
+            sensor = SensorType::OUSTER;
+        }
+        else if (sensorStr == "livox")
+        {
+            sensor = SensorType::LIVOX;
+        }
+        else
+        {
+            ROS_ERROR_STREAM(
+                "Invalid sensor type (must be either 'velodyne' or 'ouster' or 'livox'): " << sensorStr);
+            ros::shutdown();
+        }
+
         nh.param<int>(PROJECT_NAME + "/N_SCAN", N_SCAN, 16);
         nh.param<int>(PROJECT_NAME + "/Horizon_SCAN", Horizon_SCAN, 1800);
-        nh.param<std::string>(PROJECT_NAME + "/timeField", timeField, "time");
         nh.param<int>(PROJECT_NAME + "/downsampleRate", downsampleRate, 1);
+        nh.param<float>(PROJECT_NAME + "/lidarMinRange", lidarMinRange, 1.0);
+        nh.param<float>(PROJECT_NAME + "/lidarMaxRange", lidarMaxRange, 1000.0);
 
         nh.param<float>(PROJECT_NAME + "/imuAccNoise", imuAccNoise, 0.01);
         nh.param<float>(PROJECT_NAME + "/imuGyrNoise", imuGyrNoise, 0.001);
         nh.param<float>(PROJECT_NAME + "/imuAccBiasN", imuAccBiasN, 0.0002);
         nh.param<float>(PROJECT_NAME + "/imuGyrBiasN", imuGyrBiasN, 0.00003);
         nh.param<float>(PROJECT_NAME + "/imuGravity", imuGravity, 9.80511);
+        nh.param<float>(PROJECT_NAME + "/imuRPYWeight", imuRPYWeight, 0.01);
 
     #if IF_OFFICIAL
         nh.param<vector<double>>(PROJECT_NAME+ "/extrinsicRot", extRotV, vector<double>());
@@ -271,6 +311,8 @@ public:
         nh.param<float>(PROJECT_NAME + "/surroundingKeyframeSearchRadius", surroundingKeyframeSearchRadius, 50.0);
 
         nh.param<bool>(PROJECT_NAME + "/loopClosureEnableFlag", loopClosureEnableFlag, false);
+        nh.param<float>(PROJECT_NAME + "/loopClosureFrequency", loopClosureFrequency, 1.0);
+
         nh.param<int>(PROJECT_NAME + "/surroundingKeyframeSize", surroundingKeyframeSize, 50);
         nh.param<float>(PROJECT_NAME + "/historyKeyframeSearchRadius", historyKeyframeSearchRadius, 10.0);
         nh.param<float>(PROJECT_NAME + "/historyKeyframeSearchTimeDiff", historyKeyframeSearchTimeDiff, 30.0);
