@@ -5,7 +5,7 @@ project_name: "lvi_sam"
 
 #common parameters
 imu_topic: "/imu/data_raw"
-image_topic: "/stereo/left/image_raw"
+image_topic: "/stereo/left/image_raw0"
 point_cloud_topic: "lvi_sam/lidar/deskew/cloud_deskewed"
 
 # Lidar Params
@@ -36,6 +36,7 @@ acc_w: 0.002        # accelerometer bias random work noise standard deviation.
 gyr_w: 4.0e-5       # gyroscope bias random work noise standard deviation.
 g_norm: 9.805       #
 
+## this param is for KAIST urban 27
 # Extrinsic parameter between IMU and Camera.
 estimate_extrinsic: 0   # 0  Have an accurate extrinsic parameters. We will trust the following imu^R_cam, imu^T_cam, don't change it.
                         # 1  Have an initial guess about extrinsic parameters. We will optimize around your initial guess.
@@ -54,7 +55,7 @@ extrinsicTranslation: !!opencv-matrix
    rows: 3
    cols: 1
    dt: d
-   data: [1.14967300e-01, 0.00000000e+00, -2.69298700e+00]
+   data: [1.71239, 0.247401, -0.11589]  
 
 #feature traker paprameters
 max_cnt: 150            # max feature number in feature tracking

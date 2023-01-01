@@ -1,8 +1,8 @@
 <launch>
 	<!-- Lidar odometry param -->
-	<rosparam file="$(find lvi_sam)/config/kaist_lidar.yaml" command="load" />
+	<rosparam file="$(find lvi_sam)/config/KAIST_lidar.yaml" command="load" />
 	<!-- VINS config -->
-	<param name="vins_config_file" type="string" value="$(find lvi_sam)/config/kaist_camera.yaml" />
+	<param name="vins_config_file" type="string" value="$(find lvi_sam)/config/KAIST_camera.yaml" />
     <!-- Image conversion -->
 	<node pkg="image_transport" type="republish" name="republish" args="compressed in:=/camera/image_raw raw out:=/camera/image_raw" output="screen" respawn="true" />
 

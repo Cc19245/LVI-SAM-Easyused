@@ -4,7 +4,7 @@ PROJECT_NAME: "lvi_sam"
 lvi_sam:
 
   # Topics
-  pointCloudTopic: "/ns1/velodyne_points"               # Point cloud data
+  pointCloudTopic: "/ns2/velodyne_points"               # Point cloud data
   imuTopic: "/imu/data_raw"                         # IMU data
 
   # Heading
@@ -21,18 +21,19 @@ lvi_sam:
   downsampleRate: 1                           # default: 1. Downsample your data if too many points. i.e., 16 = 64 / 4, 16 = 16 / 1 
 
   # IMU Settings
-  imuAccNoise: 3.9939570888238808e-03
-  imuGyrNoise: 1.5636343949698187e-03
-  imuAccBiasN: 6.4356659353532566e-05
-  imuGyrBiasN: 3.5640318696367613e-05
-  imuGravity: 9.80511
+  imuAccNoise: 2.0e-02
+  imuGyrNoise: 5.0e-03
+  imuAccBiasN: 5.0e-05
+  imuGyrBiasN: 3.0e-05
+  imuGravity: 9.81
   
+  ## this param is for KAIST urban 27
   ###################### extrinsic between IMU and LiDAR  ###########################
   ###################### T_IMU_LiDAR, LiDAR -> IMU       ###########################
-  extrinsicTranslation: [-0.02342361, 0, -3.298731]
+  extrinsicTranslation: [-0.264623, 0.431973, 0.24043]
   extrinsicRotation: [-0.516377, -0.702254, -0.490096,
-                       0.491997, -0.711704,  0.501414,
-                      -0.700923,  0.0177927, 0.713015 ]
+                       0.491997, -0.711704, 0.501414,
+                      -0.700923, 0.0177927, 0.713015]
 
   ########################## IMU property config  ###########################
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
@@ -60,22 +61,22 @@ lvi_sam:
   rotation_tollerance: 1000 # radians
 
   # CPU Params
-  numberOfCores: 4                              # number of cores for mapping optimization
+  numberOfCores: 10                              # number of cores for mapping optimization
   mappingProcessInterval: 0.15                  # seconds, regulate mapping frequency
 
   # Surrounding map
   surroundingkeyframeAddingDistThreshold: 1.0   # meters, regulate keyframe adding threshold
-  surroundingkeyframeAddingAngleThreshold: 0.2  # radians, regulate keyframe adding threshold
-  surroundingKeyframeDensity: 2.0               # meters, downsample surrounding keyframe poses   
-  surroundingKeyframeSearchRadius: 50.0         # meters, within n meters scan-to-map optimization (when loop closure disabled)
+  surroundingkeyframeAddingAngleThreshold: 1.5  # radians, regulate keyframe adding threshold
+  surroundingKeyframeDensity: 0.5               # meters, downsample surrounding keyframe poses   
+  surroundingKeyframeSearchRadius: 30.0         # meters, within n meters scan-to-map optimization (when loop closure disabled)
 
   # Loop closure
   loopClosureEnableFlag: true
-  surroundingKeyframeSize: 25                   # submap size (when loop closure enabled)
-  historyKeyframeSearchRadius: 20.0             # meters, key frame that is within n meters from current pose will be considerd for loop closure
+  surroundingKeyframeSize: 50                   # submap size (when loop closure enabled)
+  historyKeyframeSearchRadius: 30.0             # meters, key frame that is within n meters from current pose will be considerd for loop closure
   historyKeyframeSearchTimeDiff: 30.0           # seconds, key frame that is n seconds older will be considered for loop closure
   historyKeyframeSearchNum: 25                  # number of hostory key frames will be fused into a submap for loop closure
-  historyKeyframeFitnessScore: 0.3              # icp threshold, the smaller the better alignment
+  historyKeyframeFitnessScore: 2.0              # icp threshold, the smaller the better alignment
 
   # Visualization
   globalMapVisualizationSearchRadius: 1000.0    # meters, global map visualization radius
