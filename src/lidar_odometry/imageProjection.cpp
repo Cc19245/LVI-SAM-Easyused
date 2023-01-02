@@ -35,7 +35,8 @@ class ImageProjection : public ParamServer
 {
 private:
     std::mutex imuLock;
-    std::mutex odoLock;
+    std::mutex vinsOdomLock;
+    std::mutex imuOdomLock;
 
     ros::Subscriber subLaserCloud;
     ros::Publisher pubLaserCloud;
@@ -152,13 +153,13 @@ public:
 
     void vinsOdometryHandler(const nav_msgs::Odometry::ConstPtr &odometryMsg)
     {
-        std::lock_guard<std::mutex> lock2(odoLock);
+        std::lock_guard<std::mutex> lock2(vinsOdomLock);
         vinsOdomQueue.push_back(*odometryMsg);
     }
 
     void imuOdometryHandler(const nav_msgs::Odometry::ConstPtr &odometryMsg)
     {
-        std::lock_guard<std::mutex> lock2(odoLock);
+        std::lock_guard<std::mutex> lock2(imuOdomLock);
         imuOdomQueue.push_back(*odometryMsg);
     }
 
@@ -271,8 +272,7 @@ public:
     bool deskewInfo()
     {
         std::lock_guard<std::mutex> lock1(imuLock);
-        std::lock_guard<std::mutex> lock2(odoLock);
-
+       
         // make sure IMU data available for the scan
         if (imuQueue.empty() || imuQueue.front().header.stamp.toSec() > timeScanCur || imuQueue.back().header.stamp.toSec() < timeScanEnd)
         {
@@ -282,11 +282,17 @@ public:
 
         imuDeskewInfo();
 
-        vinsOdomDeskewInfo();
+        {
+            std::lock_guard<std::mutex> lock2(vinsOdomLock);
+            vinsOdomDeskewInfo();
+        }
 
         //? add: 当vinsOdomDeskewInfo()找到vins odom初值后，下面的代码并不会再去找imu  odom的初值
-        imuOdomDeskewInfo();
-
+        {
+            std::lock_guard<std::mutex> lock2(imuOdomLock);
+            imuOdomDeskewInfo();
+        }
+        
         return true;
     }
 
@@ -565,14 +571,14 @@ public:
         // If the sensor moves relatively slow, like walking speed, positional deskew seems to have little benefits. Thus code below is commented.
 
         //? add: 打开去平移畸变，因为对于自动驾驶场景来说，高速状态下平移还是比较大的
-        if (cloudInfo.vinsOdomAvailable == false || cloudInfo.imuOdomAvailable == false || odomDeskewFlag == false)
-            return;
+        // if (cloudInfo.vinsOdomAvailable == false || cloudInfo.imuOdomAvailable == false || odomDeskewFlag == false)
+        //     return;
 
-        float ratio = relTime / (timeScanEnd - timeScanCur);
+        // float ratio = relTime / (timeScanEnd - timeScanCur);
 
-        *posXCur = ratio * odomIncreX;
-        *posYCur = ratio * odomIncreY;
-        *posZCur = ratio * odomIncreZ;
+        // *posXCur = ratio * odomIncreX;
+        // *posYCur = ratio * odomIncreY;
+        // *posZCur = ratio * odomIncreZ;
     }
 
     PointType deskewPoint(PointType *point, double relTime)

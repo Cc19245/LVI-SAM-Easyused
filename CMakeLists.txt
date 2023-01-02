@@ -37,7 +37,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(OpenMP REQUIRED)
 find_package(PCL REQUIRED)
-find_package(OpenCV 3.4.5 REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(Ceres REQUIRED)
 find_package(GTSAM REQUIRED QUIET)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options system timer)

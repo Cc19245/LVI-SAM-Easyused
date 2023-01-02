@@ -16,9 +16,9 @@
 #include <gtsam/nonlinear/ISAM2.h>
 #include <gtsam_unstable/nonlinear/IncrementalFixedLagSmoother.h>
 
-using gtsam::symbol_shorthand::B; // Bias  (ax,ay,az,gx,gy,gz)
-using gtsam::symbol_shorthand::V; // Vel   (xdot,ydot,zdot)
 using gtsam::symbol_shorthand::X; // Pose3 (x,y,z,r,p,y)
+using gtsam::symbol_shorthand::V; // Vel   (xdot,ydot,zdot)
+using gtsam::symbol_shorthand::B; // Bias  (ax,ay,az,gx,gy,gz)
 
 class TransformFusion : public ParamServer
 {
@@ -157,6 +157,7 @@ public:
 class IMUPreintegration : public ParamServer
 {
 public:
+
     std::mutex mtx;
 
     ros::Subscriber subImu;
@@ -171,6 +172,7 @@ public:
     gtsam::noiseModel::Diagonal::shared_ptr correctionNoise;
     gtsam::noiseModel::Diagonal::shared_ptr correctionNoise2;
     gtsam::Vector noiseModelBetweenBias;
+
 
     gtsam::PreintegratedImuMeasurements *imuIntegratorOpt_;
     gtsam::PreintegratedImuMeasurements *imuIntegratorImu_;
@@ -535,9 +537,12 @@ int main(int argc, char **argv)
 
     IMUPreintegration ImuP;
 
+    TransformFusion TF;
+
     ROS_INFO("\033[1;32m----> Lidar IMU Preintegration Started.\033[0m");
 
-    ros::spin();
+    ros::MultiThreadedSpinner spinner(4);
+    spinner.spin();
 
     return 0;
 }

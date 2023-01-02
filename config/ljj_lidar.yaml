@@ -6,19 +6,32 @@ lvi_sam:
   # Topics
   pointCloudTopic: "/velodyne_points_recovery"               # Point cloud data
   imuTopic: "/imu1/data"                         # IMU data
+  odomTopic: "odometry/imu"                   # IMU pre-preintegration odometry, same frequency as IMU
+  gpsTopic: "odometry/gpsz"                   # GPS odometry topic from navsat, see module_navsat.launch file
+ 
+  # Frames
+  lidarFrame: "base_link"
+  baselinkFrame: "base_link"
+  odometryFrame: "odom"
+  mapFrame: "map"
 
-  # Heading
-  useImuHeadingInitialization: false          # if using GPS data, set to "true"
-  
+  # GPS Settings
+  useImuHeadingInitialization: false           # if using GPS data, set to "true"
+  useGpsElevation: false                      # if GPS elevation is bad, set to "false"
+  gpsCovThreshold: 2.0                        # m^2, threshold for using GPS data
+  poseCovThreshold: 25.0                      # m^2, threshold for using GPS data
+
   # Export settings
   savePCD: false                              # https://github.com/TixiaoShan/LIO-SAM/issues/3
   savePCDDirectory: "/Downloads/LOAM/"        # in your home folder, starts and ends with "/". Warning: the code deletes "LOAM" folder then recreates it. See "mapOptimization" for implementation
 
   # Sensor Settings
-  N_SCAN: 16                                  # number of lidar channel (i.e., 16, 32, 64, 128)
-  Horizon_SCAN: 1800                          # lidar horizontal resolution (Velodyne:1800, Ouster:512,1024,2048)
-  timeField: "time"                           # point timestamp field, Velodyne - "time", Ouster - "t"
-  downsampleRate: 1                           # default: 1. Downsample your data if too many points. i.e., 16 = 64 / 4, 16 = 16 / 1 
+  sensor: velodyne                            # lidar sensor type, 'velodyne' or 'ouster' or 'livox'
+  N_SCAN: 16                                  # number of lidar channel (i.e., Velodyne/Ouster: 16, 32, 64, 128, Livox Horizon: 6)
+  Horizon_SCAN: 1800                          # lidar horizontal resolution (Velodyne:1800, Ouster:512,1024,2048, Livox Horizon: 4000)
+  downsampleRate: 1                           # default: 1. Downsample your data if too many points. i.e., 16 = 64 / 4, 16 = 16 / 1
+  lidarMinRange: 1.0                          # default: 1.0, minimum lidar range to be used
+  lidarMaxRange: 100.0                       # default: 1000.0, maximum lidar range to be used
 
   # IMU Settings
   imuAccNoise: 3.9939570888238808e-03
@@ -71,6 +84,7 @@ lvi_sam:
 
   # Loop closure
   loopClosureEnableFlag: true
+  loopClosureFrequency: 0.2                     # Hz, regulate loop closure constraint add frequency
   surroundingKeyframeSize: 25                   # submap size (when loop closure enabled)
   historyKeyframeSearchRadius: 20.0             # meters, key frame that is within n meters from current pose will be considerd for loop closure
   historyKeyframeSearchTimeDiff: 30.0           # seconds, key frame that is n seconds older will be considered for loop closure

@@ -19,10 +19,10 @@
 
 using namespace gtsam;
 
+using symbol_shorthand::X; // Pose3 (x,y,z,r,p,y)
+using symbol_shorthand::V; // Vel   (xdot,ydot,zdot)
 using symbol_shorthand::B; // Bias  (ax,ay,az,gx,gy,gz)
 using symbol_shorthand::G; // GPS pose
-using symbol_shorthand::V; // Vel   (xdot,ydot,zdot)
-using symbol_shorthand::X; // Pose3 (x,y,z,r,p,y)
 
 /*
     * A point cloud type that has 6D pose info ([x,y,z,roll,pitch,yaw] intensity is time stamp)
@@ -81,16 +81,16 @@ public:
 
     vector<pcl::PointCloud<PointType>::Ptr> cornerCloudKeyFrames;
     vector<pcl::PointCloud<PointType>::Ptr> surfCloudKeyFrames;
-
+    
     pcl::PointCloud<PointType>::Ptr cloudKeyPoses3D;
     pcl::PointCloud<PointTypePose>::Ptr cloudKeyPoses6D;
     pcl::PointCloud<PointType>::Ptr copy_cloudKeyPoses3D;
     pcl::PointCloud<PointTypePose>::Ptr copy_cloudKeyPoses6D;
 
-    pcl::PointCloud<PointType>::Ptr laserCloudCornerLast;   // corner feature set from odoOptimization
-    pcl::PointCloud<PointType>::Ptr laserCloudSurfLast;     // surf feature set from odoOptimization
-    pcl::PointCloud<PointType>::Ptr laserCloudCornerLastDS; // downsampled corner featuer set from odoOptimization
-    pcl::PointCloud<PointType>::Ptr laserCloudSurfLastDS;   // downsampled surf featuer set from odoOptimization
+    pcl::PointCloud<PointType>::Ptr laserCloudCornerLast; // corner feature set from odoOptimization
+    pcl::PointCloud<PointType>::Ptr laserCloudSurfLast; // surf feature set from odoOptimization
+    pcl::PointCloud<PointType>::Ptr laserCloudCornerLastDS; // downsampled corner feature set from odoOptimization
+    pcl::PointCloud<PointType>::Ptr laserCloudSurfLastDS; // downsampled surf feature set from odoOptimization
 
     pcl::PointCloud<PointType>::Ptr laserCloudOri;
     pcl::PointCloud<PointType>::Ptr coeffSel;
@@ -118,7 +118,7 @@ public:
     pcl::VoxelGrid<PointType> downSizeFilterSurf;
     pcl::VoxelGrid<PointType> downSizeFilterICP;
     pcl::VoxelGrid<PointType> downSizeFilterSurroundingKeyPoses; // for surrounding key poses of scan-to-map optimization
-
+    
     ros::Time timeLaserInfoStamp;
     double timeLaserInfoCur;
 
@@ -134,8 +134,6 @@ public:
     int laserCloudSurfFromMapDSNum = 0;
     int laserCloudCornerLastDSNum = 0;
     int laserCloudSurfLastDSNum = 0;
-
-    int imuPreintegrationResetId = 0;
 
     bool aLoopIsClosed = false;
     map<int, int> loopIndexContainer; // from new to old
@@ -400,9 +398,8 @@ public:
         downSizeFilterCorner.setLeafSize(mappingCornerLeafSize, mappingCornerLeafSize, mappingCornerLeafSize);
         downSizeFilterSurf.setLeafSize(mappingSurfLeafSize, mappingSurfLeafSize, mappingSurfLeafSize);
 
-        cout << "****************************************************" << endl;
-        cout << "Saving map to pcd files completed\n"
-             << endl;
+	    cout << "****************************************************" << endl;
+	    cout << "Saving map to pcd files completed\n" << endl;
 
         return true;
     }
@@ -437,7 +434,7 @@ public:
             return;
 
         pcl::KdTreeFLANN<PointType>::Ptr kdtreeGlobalMap(new pcl::KdTreeFLANN<PointType>());
-        ;
+        
         pcl::PointCloud<PointType>::Ptr globalMapKeyPoses(new pcl::PointCloud<PointType>());
         pcl::PointCloud<PointType>::Ptr globalMapKeyPosesDS(new pcl::PointCloud<PointType>());
         pcl::PointCloud<PointType>::Ptr globalMapKeyFrames(new pcl::PointCloud<PointType>());
@@ -455,7 +452,7 @@ public:
         for (int i = 0; i < (int)pointSearchIndGlobalMap.size(); ++i)
             globalMapKeyPoses->push_back(cloudKeyPoses3D->points[pointSearchIndGlobalMap[i]]);
         // downsample near selected key frames
-        pcl::VoxelGrid<PointType> downSizeFilterGlobalMapKeyPoses;                                                                                            // for global map visualization
+        pcl::VoxelGrid<PointType> downSizeFilterGlobalMapKeyPoses; // for global map visualization
         downSizeFilterGlobalMapKeyPoses.setLeafSize(globalMapVisualizationPoseDensity, globalMapVisualizationPoseDensity, globalMapVisualizationPoseDensity); // for global map visualization
         downSizeFilterGlobalMapKeyPoses.setInputCloud(globalMapKeyPoses);
         downSizeFilterGlobalMapKeyPoses.filter(*globalMapKeyPosesDS);
@@ -819,17 +816,19 @@ public:
         else
         {
             ROS_WARN("VINS odom failure in Lidar init guess! Try to use imu odom!");
+            std::cout << "vinsOdomAvailable = " << cloudInfo.vinsOdomAvailable << ", this vinsOdomResetId = "
+                << cloudInfo.vinsOdomResetId << ", last = " << vinsOdomResetId << std::endl;
             vinsOdomResetId = cloudInfo.vinsOdomResetId;
             lastVinsTransAvailable = false;
         }
 
         // use imu pre-integration estimation for pose guess
         // Step 2. 其次使用imu odom做初值猜测
-        static int imuOdomResetId = 0; //; 上次imu里程计重启的id
+        // static int imuOdomResetId = 0; //; 上次imu里程计重启的id
         static bool lastImuPreTransAvailable = false;
         static Eigen::Affine3f lastImuPreTransformation;
         //; 两次重启id必须一样，这样才说明最近imu odom没有重启，这样的位姿才是比较准确的
-        if (cloudInfo.imuOdomAvailable == true && cloudInfo.imuOdomResetId == imuOdomResetId)
+        if (cloudInfo.imuOdomAvailable == true /* && cloudInfo.imuOdomResetId == imuOdomResetId */)
         {
             Eigen::Affine3f transBack = pcl::getTransformation(cloudInfo.initialGuessX, cloudInfo.initialGuessY, cloudInfo.initialGuessZ,
                                                                cloudInfo.initialGuessRoll, cloudInfo.initialGuessPitch, cloudInfo.initialGuessYaw);
@@ -854,9 +853,9 @@ public:
         }
         else
         {
-            ROS_WARN("IMU odom failure in Lidar init guess! Try to use raw imu quat!");
-            imuOdomResetId = cloudInfo.imuOdomResetId;
-            lastImuPreTransAvailable = false;
+            // ROS_WARN("IMU odom failure in Lidar init guess! Try to use raw imu quat!");
+            // imuOdomResetId = cloudInfo.imuOdomResetId;
+            // lastImuPreTransAvailable = false;
         }
 
         // use imu incremental estimation for pose guess (only rotation)
@@ -1685,8 +1684,6 @@ public:
             }
 
             aLoopIsClosed = false;
-            // ID for reseting IMU pre-integration
-            ++imuPreintegrationResetId;
         }
     }
 
