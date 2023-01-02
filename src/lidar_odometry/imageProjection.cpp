@@ -571,14 +571,17 @@ public:
         // If the sensor moves relatively slow, like walking speed, positional deskew seems to have little benefits. Thus code below is commented.
 
         //? add: 打开去平移畸变，因为对于自动驾驶场景来说，高速状态下平移还是比较大的
-        // if (cloudInfo.vinsOdomAvailable == false || cloudInfo.imuOdomAvailable == false || odomDeskewFlag == false)
-        //     return;
+        if(transDeskew)
+        {
+            if (cloudInfo.vinsOdomAvailable == false || cloudInfo.imuOdomAvailable == false || odomDeskewFlag == false)
+                return;
 
-        // float ratio = relTime / (timeScanEnd - timeScanCur);
+            float ratio = relTime / (timeScanEnd - timeScanCur);
 
-        // *posXCur = ratio * odomIncreX;
-        // *posYCur = ratio * odomIncreY;
-        // *posZCur = ratio * odomIncreZ;
+            *posXCur = ratio * odomIncreX;
+            *posYCur = ratio * odomIncreY;
+            *posZCur = ratio * odomIncreZ;
+        }
     }
 
     PointType deskewPoint(PointType *point, double relTime)

@@ -32,7 +32,8 @@ lvi_sam:
   timeField: "time"                           # point timestamp field, Velodyne - "time", Ouster - "t"
   downsampleRate: 1                           # default: 1. Downsample your data if too many points. i.e., 16 = 64 / 4, 16 = 16 / 1
   lidarMinRange: 1.0                          # default: 1.0, minimum lidar range to be used
-  lidarMaxRange: 100.0                       # default: 1000.0, maximum lidar range to be used
+  lidarMaxRange: 100.0                        # default: 1000.0, maximum lidar range to be used
+  transDeskew: true                           # 使用平移去畸变，如果跑步下来可以尝试修改这个为true或false
 
   # IMU Settings
   imuAccNoise: 2.0e-02
@@ -42,7 +43,7 @@ lvi_sam:
   imuGravity: 9.81
   imuRPYWeight: 0.01
 
-  ## this param is for KAIST urban 27
+  ## this param is for KAIST urban 26
   ###################### extrinsic between IMU and LiDAR  ###########################
   ###################### T_IMU_LiDAR, LiDAR -> IMU       ###########################
   extrinsicTranslation: [-0.264623, 0.431973, 0.24043]  

@@ -815,9 +815,9 @@ public:
         }
         else
         {
-            ROS_WARN("VINS odom failure in Lidar init guess! Try to use imu odom!");
-            std::cout << "vinsOdomAvailable = " << cloudInfo.vinsOdomAvailable << ", this vinsOdomResetId = "
-                << cloudInfo.vinsOdomResetId << ", last = " << vinsOdomResetId << std::endl;
+            // ROS_WARN("VINS odom failure in Lidar init guess! Try to use imu odom!");
+            // std::cout << "vinsOdomAvailable = " << cloudInfo.vinsOdomAvailable << ", this vinsOdomResetId = "
+            //     << cloudInfo.vinsOdomResetId << ", last = " << vinsOdomResetId << std::endl;
             vinsOdomResetId = cloudInfo.vinsOdomResetId;
             lastVinsTransAvailable = false;
         }
@@ -863,7 +863,7 @@ public:
         if (cloudInfo.imuAvailable == true)
         {
             // ROS_INFO("Using IMU initial guess");
-            ROS_WARN("WARN: Use raw IMU quat in Lidar init guess! VINS odom and IMU odom all failed! Please check!");
+            // ROS_WARN("WARN: Use raw IMU quat in Lidar init guess! VINS odom and IMU odom all failed! Please check!");
             Eigen::Affine3f transBack = pcl::getTransformation(0, 0, 0, cloudInfo.imuRollInit, cloudInfo.imuPitchInit, cloudInfo.imuYawInit);
             Eigen::Affine3f transIncre = lastImuTransformation.inverse() * transBack;
 

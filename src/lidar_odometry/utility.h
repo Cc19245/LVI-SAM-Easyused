@@ -100,6 +100,7 @@ public:
     int downsampleRate;
     float lidarMinRange;
     float lidarMaxRange;
+    bool transDeskew;
 
     // IMU
     float imuAccNoise;
@@ -216,6 +217,7 @@ public:
         nh.param<int>(PROJECT_NAME + "/downsampleRate", downsampleRate, 1);
         nh.param<float>(PROJECT_NAME + "/lidarMinRange", lidarMinRange, 1.0);
         nh.param<float>(PROJECT_NAME + "/lidarMaxRange", lidarMaxRange, 1000.0);
+        nh.param<bool>(PROJECT_NAME + "/transDeskew", transDeskew, false);
 
         nh.param<float>(PROJECT_NAME + "/imuAccNoise", imuAccNoise, 0.01);
         nh.param<float>(PROJECT_NAME + "/imuGyrNoise", imuGyrNoise, 0.001);
