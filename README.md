@@ -3,8 +3,25 @@
 This repository contains modified code of [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) for easier using. The test video on many datasets is available on **YouTube** (click below images to open) and [**Bilibili**](https://www.bilibili.com/video/BV1jv4y1Q7zr/?vd_source=1363e3b30e51ca9984f82492949f865b).
 
 <div align="center">
-<a href="https://youtu.be/kty_oOBuyCY" target="_blank"><img src="./doc/handheld.png" alt="video" width="80%" /></a>
+<a href="https://youtu.be/kty_oOBuyCY" target="_blank"><img src="./doc/fig/handheld.png" alt="video" width="80%" /></a>
 </div>
+
+
+
+---
+
+### Update
+
+- **2023.1.02**：The "**new**" branch is avaliable, in which we update the latest [LIO-SAM repo](https://github.com/TixiaoShan/LIO-SAM) to LVI-SAM. We **recommend you to use the "new" branch**, because the LiDAR-Inertia system in the original LVI-SAM code repo uses an old version of LIO-SAM with some bugs, which have been fixed in the latest LIO-SAM code repo. At present, we have updated the latest version of LIO-SAM into LVI-SAM, so the system is more robust. You can use the following commands to download and compile the "**new**" branch.
+
+  ```shell
+  mkdir -p ~/catkin_ws/src 
+  cd ~/catkin_ws/src
+  git clone https://github.com/Cc19245/LVI-SAM-Easyused
+  git checkout new
+  cd ..
+  catkin_make
+  ```
 
 
 ---
@@ -90,8 +107,9 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 ```
 
 <p align='center'>
-    <img src="./doc/official-equipment.png" alt="drawing" width="500"/>
+    <img src="./doc/fig/official-equipment.png" alt="drawing" width="500"/>
 </p>
+
 
 **For most of the IMUs, the Euler angle coordinate system is same as the acceleration and angular velocity coordinate system**. So the above parameters should be set as follows.
 
@@ -105,8 +123,9 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
   rollAxis: "+x"    
 ```
 <p align='center'>
-    <img src="./doc/imu.png" alt="drawing" width="300"/>
+    <img src="./doc/fig/imu.png" alt="drawing" width="300"/>
 </p>
+
 
 
 ---
@@ -138,9 +157,10 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
    - Results of origin official code (up fig) and our modified code (down fig) on handheld.bag:
 
      <p align='center'>
-         <img src="./doc/handheld-official.png" alt="drawing" width="600"/>
+         <img src="./doc/fig/handheld-official.png" alt="drawing" width="600"/>
      </p>
 
+     
      <p align='center'>
          <img src="./doc/handheld.png" alt="drawing" width="600"/>
      </p>
@@ -162,7 +182,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
    - Results of our modified code on gate_01.bag:
 
      <p align='center'>
-         <img src="./doc/gate_01.png" alt="drawing" width="600"/>
+         <img src="./doc/fig/gate_01.png" alt="drawing" width="600"/>
      </p>
 
 3. [UrbanNavDataset](https://github.com/weisongwen/UrbanNavDataset)
@@ -181,7 +201,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 
    - Results on UrbanNav-HK-Data20200314:
 
-     <p align='center'>    <img src="./doc/urbannav.png" alt="drawing" width="600"/></p>
+     <p align='center'>    <img src="./doc/fig/urbannav.png" alt="drawing" width="600"/></p>
 
 3. [KITTI raw dataset](https://www.cvlibs.net/datasets/kitti/raw_data.php)
 
@@ -200,7 +220,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
    - Results of our modified code on kitti_2011_09_26_drive_0084_synced.bag:
 
      <p align='center'>
-         <img src="./doc/kitti.png" alt="drawing" width="600"/>
+         <img src="./doc/fig/kitti.png" alt="drawing" width="600"/>
      </p>
 
 3. [My test dataset](https://1drv.ms/u/s!AqYajE_ft9lwg0paJQu_DRzU-GQ5?e=A95yfn)
@@ -220,7 +240,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
    - Results of our modified code on backbag.bag:
 
      <p align='center'>
-         <img src="./doc/backbag.png" alt="drawing" width="600"/>
+         <img src="./doc/fig/backbag.png" alt="drawing" width="600"/>
      </p>
 
    - Results of our modified code on our own 0117-1525.bag (Device is different from backbag.bag, so it has another params. However, sorry for privacy issues, this data package can not open source):
@@ -230,7 +250,11 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
      rosbag play 0117-1525.bag 
      ```
 
-     <p align='center'>    <img src="./doc/ljj.gif" alt="drawing" width="600"/></p>
+     <p align='center'>    <img src="./doc/fig/ljj.gif" alt="drawing" width="600"/></p>
+   
+6. [KAIST Complex Urban Dataset](https://sites.google.com/view/complex-urban-dataset) 
+
+   See TODO.
 
 ---
 
@@ -238,7 +262,34 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 
 ## TODO
 
-  - [ ] More test on different dataset, e.g. KAIST. **However**, these datasets' lidar data have no **ring** information. So LVI-SAM can't run directly. If you want to run on these datasets, you need to modifidy the code to add this information refer to [LeGO-LOAM](https://github.com/RobustFieldAutonomyLab/LeGO-LOAM).
+  - [x] ~~More test on different dataset, e.g. [KAIST Complex Urban Dataset](https://sites.google.com/view/complex-urban-dataset). **However**, these datasets' lidar data have no **ring** information. So LVI-SAM can't run directly. If you want to run on these datasets, you need to modifidy the code to add this information refer to [LeGO-LOAM](https://github.com/RobustFieldAutonomyLab/LeGO-LOAM).~~
+
+- We have test  [KAIST Complex Urban Dataset](https://sites.google.com/view/complex-urban-dataset) on "**new**" branch. We mainly made two changes:
+
+  - We updated the latest version of LIO-SAM repo code into LVI-SAM, so the system is more robust and can run on KAIST Complex Urban Dataset successfully.
+  - We refer to [kaist2bag](https://github.com/tsyxyz/kaist2bag) to generate rosbag from the origin [KAIST Complex Urban Dataset](https://sites.google.com/view/complex-urban-dataset), and refer to [clins](https://github.com/APRIL-ZJU/clins) to recover the `ring`and `time` fild of the LiDAR pointcloud. You can using the ros package in [doc/kaise-help](./doc/kaist-help) to get the rosbag.
+
+- Test on  [KAIST Complex Urban Dataset urban26](https://sites.google.com/view/complex-urban-dataset/download-lidar-stereo) sequence.
+
+  - Run the launch file:
+
+    ```
+    roslaunch lvi_sam KAIST.launch
+    ```
+
+  - Play the bag files generated by [doc/kaise-help](./doc/kaist-help) , e.g. urban26.bag:
+
+    ```
+    rosbag play urban26.bag 
+    ```
+
+  - Results of our modified code on urban26.bag:
+
+    <p align='left'>    <img src="./doc/fig/kaist1.png" alt="drawing" width="600"/></p>
+
+    <p align='left'>    <img src="./doc/fig/kaist2.png" alt="drawing" width="600"/></p>
+
+    We can see that the trajectory has a large dirft, and the loop closure doesn't be detected successfully. This may be due to the reason that the LiDAR of the KAIST dataset is installed obliquely, resulting in too few valid pointclouds.
 
 ---
 
