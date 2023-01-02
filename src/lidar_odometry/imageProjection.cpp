@@ -9,12 +9,11 @@ struct VelodynePointXYZIRT
     float time;
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 } EIGEN_ALIGN16;
-POINT_CLOUD_REGISTER_POINT_STRUCT (VelodynePointXYZIRT,
-    (float, x, x) (float, y, y) (float, z, z) (float, intensity, intensity)
-    (uint16_t, ring, ring) (float, time, time)
-)
+POINT_CLOUD_REGISTER_POINT_STRUCT(VelodynePointXYZIRT,
+                                  (float, x, x)(float, y, y)(float, z, z)(float, intensity, intensity)(uint16_t, ring, ring)(float, time, time))
 
-struct OusterPointXYZIRT {
+struct OusterPointXYZIRT
+{
     PCL_ADD_POINT4D;
     float intensity;
     uint32_t t;
@@ -25,10 +24,7 @@ struct OusterPointXYZIRT {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 } EIGEN_ALIGN16;
 POINT_CLOUD_REGISTER_POINT_STRUCT(OusterPointXYZIRT,
-    (float, x, x) (float, y, y) (float, z, z) (float, intensity, intensity)
-    (uint32_t, t, t) (uint16_t, reflectivity, reflectivity)
-    (uint8_t, ring, ring) (uint16_t, noise, noise) (uint32_t, range, range)
-)
+                                  (float, x, x)(float, y, y)(float, z, z)(float, intensity, intensity)(uint32_t, t, t)(uint16_t, reflectivity, reflectivity)(uint8_t, ring, ring)(uint16_t, noise, noise)(uint32_t, range, range))
 
 // Use the Velodyne point format as a common representation
 using PointXYZIRT = VelodynePointXYZIRT;
@@ -50,8 +46,10 @@ private:
     ros::Subscriber subImu;
     std::deque<sensor_msgs::Imu> imuQueue;
 
-    ros::Subscriber subOdom;
-    std::deque<nav_msgs::Odometry> odomQueue;
+    ros::Subscriber subVinsOdom;
+    ros::Subscriber subImuOdom;
+    std::deque<nav_msgs::Odometry> vinsOdomQueue;
+    std::deque<nav_msgs::Odometry> imuOdomQueue;
 
     std::deque<sensor_msgs::PointCloud2> cloudQueue;
     sensor_msgs::PointCloud2 currentCloudMsg;
@@ -90,7 +88,8 @@ public:
     {
         subImu = nh.subscribe<sensor_msgs::Imu>(imuTopic, 2000, &ImageProjection::imuHandler, this, ros::TransportHints().tcpNoDelay());
         //! 重要：VIO发来的里程计消息，会作为后端点云配准的位姿初值
-        subOdom = nh.subscribe<nav_msgs::Odometry>(PROJECT_NAME + "/vins/odometry/imu_propagate_ros", 2000, &ImageProjection::odometryHandler, this, ros::TransportHints().tcpNoDelay());
+        subVinsOdom = nh.subscribe<nav_msgs::Odometry>(PROJECT_NAME + "/vins/odometry/imu_propagate_ros", 2000, &ImageProjection::vinsOdometryHandler, this, ros::TransportHints().tcpNoDelay());
+        subImuOdom = nh.subscribe<nav_msgs::Odometry>(odomTopic + "_incremental", 2000, &ImageProjection::imuOdometryHandler, this, ros::TransportHints().tcpNoDelay());
         subLaserCloud = nh.subscribe<sensor_msgs::PointCloud2>(pointCloudTopic, 5, &ImageProjection::cloudHandler, this, ros::TransportHints().tcpNoDelay());
 
         pubExtractedCloud = nh.advertise<sensor_msgs::PointCloud2>(PROJECT_NAME + "/lidar/deskew/cloud_deskewed", 5);
@@ -151,10 +150,16 @@ public:
         imuQueue.push_back(thisImu);
     }
 
-    void odometryHandler(const nav_msgs::Odometry::ConstPtr &odometryMsg)
+    void vinsOdometryHandler(const nav_msgs::Odometry::ConstPtr &odometryMsg)
     {
         std::lock_guard<std::mutex> lock2(odoLock);
-        odomQueue.push_back(*odometryMsg);
+        vinsOdomQueue.push_back(*odometryMsg);
+    }
+
+    void imuOdometryHandler(const nav_msgs::Odometry::ConstPtr &odometryMsg)
+    {
+        std::lock_guard<std::mutex> lock2(odoLock);
+        imuOdomQueue.push_back(*odometryMsg);
     }
 
     void cloudHandler(const sensor_msgs::PointCloud2ConstPtr &laserCloudMsg)
@@ -277,7 +282,10 @@ public:
 
         imuDeskewInfo();
 
-        odomDeskewInfo();
+        vinsOdomDeskewInfo();
+
+        //? add: 当vinsOdomDeskewInfo()找到vins odom初值后，下面的代码并不会再去找imu  odom的初值
+        imuOdomDeskewInfo();
 
         return true;
     }
@@ -342,30 +350,30 @@ public:
         cloudInfo.imuAvailable = true;
     }
 
-    void odomDeskewInfo()
+    void vinsOdomDeskewInfo()
     {
-        cloudInfo.odomAvailable = false;
+        cloudInfo.vinsOdomAvailable = false;
 
-        while (!odomQueue.empty())
+        while (!vinsOdomQueue.empty())
         {
-            if (odomQueue.front().header.stamp.toSec() < timeScanCur - 0.01)
-                odomQueue.pop_front();
+            if (vinsOdomQueue.front().header.stamp.toSec() < timeScanCur - 0.01)
+                vinsOdomQueue.pop_front();
             else
                 break;
         }
 
-        if (odomQueue.empty())
+        if (vinsOdomQueue.empty())
             return;
 
-        if (odomQueue.front().header.stamp.toSec() > timeScanCur)
+        if (vinsOdomQueue.front().header.stamp.toSec() > timeScanCur)
             return;
 
         // get start odometry at the beinning of the scan
         nav_msgs::Odometry startOdomMsg;
 
-        for (int i = 0; i < (int)odomQueue.size(); ++i)
+        for (int i = 0; i < (int)vinsOdomQueue.size(); ++i)
         {
-            startOdomMsg = odomQueue[i];
+            startOdomMsg = vinsOdomQueue[i];
 
             if (ROS_TIME(&startOdomMsg) < timeScanCur)
                 continue;
@@ -380,27 +388,28 @@ public:
         tf::Matrix3x3(orientation).getRPY(roll, pitch, yaw);
 
         // Initial guess used in mapOptimization
-        //! 重要：这里会把前端vins发来的位姿作为后端scan-to-map匹配的初值，所以vins发来的必须是T_odom_lidar
+        //! 重要：这里会把前端vins发来的位姿作为后端scan-to-map匹配的初值，所以vins发来的必须是T_world_lidar
         cloudInfo.initialGuessX = startOdomMsg.pose.pose.position.x;
         cloudInfo.initialGuessY = startOdomMsg.pose.pose.position.y;
         cloudInfo.initialGuessZ = startOdomMsg.pose.pose.position.z;
-        cloudInfo.initialGuessRoll  = roll;
+        cloudInfo.initialGuessRoll = roll;
         cloudInfo.initialGuessPitch = pitch;
-        cloudInfo.initialGuessYaw   = yaw;
-
-        cloudInfo.odomAvailable = true;
+        cloudInfo.initialGuessYaw = yaw;
+        //; vins里程计重启id，在计算后端优化的初值时会使用
+        cloudInfo.vinsOdomResetId = (int)round(startOdomMsg.pose.covariance[0]);
+        cloudInfo.vinsOdomAvailable = true;
 
         // get end odometry at the end of the scan
         odomDeskewFlag = false;
 
-        if (odomQueue.back().header.stamp.toSec() < timeScanEnd)
+        if (vinsOdomQueue.back().header.stamp.toSec() < timeScanEnd)
             return;
 
         nav_msgs::Odometry endOdomMsg;
 
-        for (int i = 0; i < (int)odomQueue.size(); ++i)
+        for (int i = 0; i < (int)vinsOdomQueue.size(); ++i)
         {
-            endOdomMsg = odomQueue[i];
+            endOdomMsg = vinsOdomQueue[i];
 
             if (ROS_TIME(&endOdomMsg) < timeScanEnd)
                 continue;
@@ -408,6 +417,7 @@ public:
                 break;
         }
 
+        //; 要保证前后的vins odom数据的id是一样的，即vins odom没有经过复位操作
         if (int(round(startOdomMsg.pose.covariance[0])) != int(round(endOdomMsg.pose.covariance[0])))
             return;
 
@@ -423,6 +433,96 @@ public:
         pcl::getTranslationAndEulerAngles(transBt, odomIncreX, odomIncreY, odomIncreZ, rollIncre, pitchIncre, yawIncre);
 
         odomDeskewFlag = true;
+    }
+
+    void imuOdomDeskewInfo()
+    {
+        cloudInfo.imuOdomAvailable = false;
+        nav_msgs::Odometry startOdomMsg;
+        tf::Quaternion orientation;
+        double roll, pitch, yaw;
+
+        while (!imuOdomQueue.empty())
+        {
+            if (imuOdomQueue.front().header.stamp.toSec() < timeScanCur - 0.01)
+                imuOdomQueue.pop_front();
+            else
+                break;
+        }
+
+        if (imuOdomQueue.empty())
+            return;
+
+        if (imuOdomQueue.front().header.stamp.toSec() > timeScanCur)
+            return;
+
+        //? add: 如果vins odom不可用，则寻找imu odom
+        if (cloudInfo.vinsOdomAvailable == false)
+        {
+            // get start odometry at the beinning of the scan
+
+            for (int i = 0; i < (int)imuOdomQueue.size(); ++i)
+            {
+                startOdomMsg = imuOdomQueue[i];
+
+                if (ROS_TIME(&startOdomMsg) < timeScanCur)
+                    continue;
+                else
+                    break;
+            }
+
+            tf::quaternionMsgToTF(startOdomMsg.pose.pose.orientation, orientation);
+            tf::Matrix3x3(orientation).getRPY(roll, pitch, yaw);
+
+            // Initial guess used in mapOptimization
+            //; 这里就使用imu odom作为后端优化的初值
+            cloudInfo.initialGuessX = startOdomMsg.pose.pose.position.x;
+            cloudInfo.initialGuessY = startOdomMsg.pose.pose.position.y;
+            cloudInfo.initialGuessZ = startOdomMsg.pose.pose.position.z;
+            cloudInfo.initialGuessRoll = roll;
+            cloudInfo.initialGuessPitch = pitch;
+            cloudInfo.initialGuessYaw = yaw;
+            //; imu里程计重启id，在计算后端优化的初值时会使用
+            cloudInfo.imuOdomResetId = (int)round(startOdomMsg.pose.covariance[0]);
+            cloudInfo.imuOdomAvailable = true;
+        }
+
+        //? add: 同理，如果vins odom的增量平移变换不可用，则寻找imu odom的增量平移变换        
+        if (odomDeskewFlag == false)
+        {
+            // get end odometry at the end of the scan
+            if (imuOdomQueue.back().header.stamp.toSec() < timeScanEnd)
+                return;
+
+            nav_msgs::Odometry endOdomMsg;
+
+            for (int i = 0; i < (int)imuOdomQueue.size(); ++i)
+            {
+                endOdomMsg = imuOdomQueue[i];
+
+                if (ROS_TIME(&endOdomMsg) < timeScanEnd)
+                    continue;
+                else
+                    break;
+            }
+
+            //; 要保证前后的imu odom数据的id是一样的，即imu odom没有经过复位操作
+            if (int(round(startOdomMsg.pose.covariance[0])) != int(round(endOdomMsg.pose.covariance[0])))
+                return;
+
+            Eigen::Affine3f transBegin = pcl::getTransformation(startOdomMsg.pose.pose.position.x, startOdomMsg.pose.pose.position.y, startOdomMsg.pose.pose.position.z, roll, pitch, yaw);
+            tf::quaternionMsgToTF(endOdomMsg.pose.pose.orientation, orientation);
+            double roll, pitch, yaw;
+            tf::Matrix3x3(orientation).getRPY(roll, pitch, yaw);
+            Eigen::Affine3f transEnd = pcl::getTransformation(endOdomMsg.pose.pose.position.x, endOdomMsg.pose.pose.position.y, endOdomMsg.pose.pose.position.z, roll, pitch, yaw);
+
+            Eigen::Affine3f transBt = transBegin.inverse() * transEnd;
+
+            float rollIncre, pitchIncre, yawIncre;
+            pcl::getTranslationAndEulerAngles(transBt, odomIncreX, odomIncreY, odomIncreZ, rollIncre, pitchIncre, yawIncre);
+
+            odomDeskewFlag = true;
+        }
     }
 
     void findRotation(double pointTime, float *rotXCur, float *rotYCur, float *rotZCur)
@@ -464,14 +564,15 @@ public:
 
         // If the sensor moves relatively slow, like walking speed, positional deskew seems to have little benefits. Thus code below is commented.
 
-        // if (cloudInfo.odomAvailable == false || odomDeskewFlag == false)
-        //     return;
+        //? add: 打开去平移畸变，因为对于自动驾驶场景来说，高速状态下平移还是比较大的
+        if (cloudInfo.vinsOdomAvailable == false || cloudInfo.imuOdomAvailable == false || odomDeskewFlag == false)
+            return;
 
-        // float ratio = relTime / (timeScanEnd - timeScanCur);
+        float ratio = relTime / (timeScanEnd - timeScanCur);
 
-        // *posXCur = ratio * odomIncreX;
-        // *posYCur = ratio * odomIncreY;
-        // *posZCur = ratio * odomIncreZ;
+        *posXCur = ratio * odomIncreX;
+        *posYCur = ratio * odomIncreY;
+        *posZCur = ratio * odomIncreZ;
     }
 
     PointType deskewPoint(PointType *point, double relTime)
@@ -533,8 +634,8 @@ public:
             if (sensor == SensorType::VELODYNE || sensor == SensorType::OUSTER)
             {
                 float horizonAngle = atan2(thisPoint.x, thisPoint.y) * 180 / M_PI;
-                static float ang_res_x = 360.0/float(Horizon_SCAN);
-                columnIdn = -round((horizonAngle-90.0)/ang_res_x) + Horizon_SCAN/2;
+                static float ang_res_x = 360.0 / float(Horizon_SCAN);
+                columnIdn = -round((horizonAngle - 90.0) / ang_res_x) + Horizon_SCAN / 2;
                 if (columnIdn >= Horizon_SCAN)
                     columnIdn -= Horizon_SCAN;
             }
@@ -543,7 +644,7 @@ public:
                 columnIdn = columnIdnCountVec[rowIdn];
                 columnIdnCountVec[rowIdn] += 1;
             }
-            
+
             if (columnIdn < 0 || columnIdn >= Horizon_SCAN)
                 continue;
 
@@ -588,7 +689,7 @@ public:
     void publishClouds()
     {
         cloudInfo.header = cloudHeader;
-        cloudInfo.cloud_deskewed  = publishCloud(pubExtractedCloud, extractedCloud, cloudHeader.stamp, lidarFrame);
+        cloudInfo.cloud_deskewed = publishCloud(pubExtractedCloud, extractedCloud, cloudHeader.stamp, lidarFrame);
         pubLaserCloudInfo.publish(cloudInfo);
     }
 };
