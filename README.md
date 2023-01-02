@@ -159,10 +159,10 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
      <p align='center'>
          <img src="./doc/fig/handheld-official.png" alt="drawing" width="600"/>
      </p>
-
+  
      
      <p align='center'>
-         <img src="./doc/handheld.png" alt="drawing" width="600"/>
+         <img src="./doc/fig/handheld.png" alt="drawing" width="600"/>
      </p>
 
 2. [M2DGR dataset](https://github.com/SJTU-ViSYS/M2DGR)
