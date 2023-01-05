@@ -26,7 +26,10 @@ This repository contains modified code of [LVI-SAM](https://github.com/TixiaoSha
 
 ---
 
+## Dependency
+The dependency of this repo is **same** as the official [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM). So if you occur a compile problem, we recommend you to compile the official [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) firstly. Right now we have only tested on Ubuntu 18.04 + ROS-melodic environment.
 
+---
 
 ## Compile
 
