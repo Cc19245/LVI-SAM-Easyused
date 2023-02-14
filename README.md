@@ -12,7 +12,7 @@ This repository contains modified code of [LVI-SAM](https://github.com/TixiaoSha
 
 ### Update
 
-- **2023.01.02**：The "**new**" branch is avaliable, in which we update the latest [LIO-SAM repo](https://github.com/TixiaoShan/LIO-SAM) to LVI-SAM. We **recommend you to use the "new" branch**, because the LiDAR-Inertial system in the original LVI-SAM code repo uses an old version of LIO-SAM with some bugs, which have been fixed in the latest LIO-SAM code repo. At present, we have updated the latest version of LIO-SAM into LVI-SAM, so the system is more robust. You can use the following commands to download and compile the "**new**" branch.
+- The "**new**" branch is avaliable, in which we update the latest [LIO-SAM repo](https://github.com/TixiaoShan/LIO-SAM) to LVI-SAM. We **recommend you to use the "new" branch**, because the LiDAR-Inertial system in the original LVI-SAM code repo uses an old version of LIO-SAM with some bugs, which have been fixed in the latest LIO-SAM code repo. At present, we have updated the latest version of LIO-SAM into LVI-SAM, so the system is more robust. You can use the following commands to download and compile the "**new**" branch.
 
   ```shell
   mkdir -p ~/catkin_ws/src 
