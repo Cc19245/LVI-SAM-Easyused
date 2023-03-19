@@ -1,18 +1,20 @@
-# LVI-SAM-Easyused
+# LVI-SAM-Easyused（[中文README](./README_CN.md)）
 
-This repository contains modified code of [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) for easier using. The test video on many datasets is available on **YouTube** (click below images to open) and [**Bilibili**](https://www.bilibili.com/video/BV1jv4y1Q7zr/?vd_source=1363e3b30e51ca9984f82492949f865b).
+This repository contains the modified code of [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) for easier using, which mainly solves the problem of ambiguous extrinsic configuration of the original LVI-SAM. Using this code, you only need to configure the extrinsic between LiDAR and IMU (**T_imu_lidar**), the extrinsic between Camera and IMU (**T_imu_camera**), and the properties of the IMU itself (**which axis the IMU rotates around counterclockwise to get a positive Euler angle output**), and then you can run LVI-SAM on different devices.
+
+The test video on many datasets is available on **YouTube** (click below images to open) and [**Bilibili**](https://www.bilibili.com/video/BV1jv4y1Q7zr/?vd_source=1363e3b30e51ca9984f82492949f865b).
 
 <div align="center">
 <a href="https://youtu.be/kty_oOBuyCY" target="_blank"><img src="./doc/fig/handheld.png" alt="video" width="80%" /></a>
 </div>
 
-
-
 ---
+
+
 
 ### Update
 
-- The "**new**" branch is avaliable, in which we update the latest [LIO-SAM repo](https://github.com/TixiaoShan/LIO-SAM) to LVI-SAM. We **recommend you to use the "new" branch**, because the LiDAR-Inertial system in the original LVI-SAM code repo uses an old version of LIO-SAM with some bugs, which have been fixed in the latest LIO-SAM code repo. At present, we have updated the latest version of LIO-SAM into LVI-SAM, so the system is more robust. You can use the following commands to download and compile the "**new**" branch.
+- The "**new**" branch is avaliable. We **recommend you to use the "new" branch**, because the LiDAR-Inertial system in the original LVI-SAM code repo uses an old version of [LIO-SAM](https://github.com/TixiaoShan/LIO-SAM) with some bugs, which have been fixed in the latest LIO-SAM code repo. At present, we have updated the latest version of LIO-SAM into LVI-SAM, so the system is more robust. You can use the following commands to download and compile the "**new**" branch.
 
   ```shell
   mkdir -p ~/catkin_ws/src 
@@ -26,10 +28,15 @@ This repository contains modified code of [LVI-SAM](https://github.com/TixiaoSha
 
 ---
 
+
+
 ## Dependency
+
 The dependency of this repo is **same** as the official [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM). So if you occur a compile problem, we recommend you to compile the official [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM) firstly. Right now we have only tested on Ubuntu 18.04 + ROS-melodic environment.
 
 ---
+
+
 
 ## Compile
 
@@ -60,7 +67,7 @@ add_definitions(-DIF_OFFICIAL=0)
 
 ### Sensors extrinsic config
 
-1. `params_camera.yaml`: set the VIO params, especially for **T_imu\_camera**. It's same as VINS-Mono.
+1. `params_camera.yaml`: set the VIO params, especially for **T_imu\_camera**, which is the camera pose represented in IMU frame. It's same as VINS-Mono.
 
 ```yaml
 ###################### extrinsic between IMU and Camera  ###########################
@@ -81,7 +88,7 @@ extrinsicTranslation: !!opencv-matrix
    data: [0.006422381632411965, 0.019939800449065116, 0.03364235163589248]
 ```
 
-2. `params_lidar.yaml`: set the LIO params, especially for **T_imu_lidar**. 
+2. `params_lidar.yaml`: set the LIO params, especially for **T_imu_lidar**, which is the lidar pose represented in IMU frame.
 
 ```yaml
   ###################### extrinsic between IMU and LiDAR  ###########################
@@ -95,9 +102,9 @@ extrinsicTranslation: !!opencv-matrix
 ```
 
 ### IMU property config
-**Note**: This is only the property of the IMU itself and has no relationship with its installation.
+(**Note**: This is only the property of the IMU itself and has no relationship with its installation.)
 
-Due to the special IMU (the Euler angle coordinate system is different from the acceleration and angular velocity coordinate system) of official dataset , you also need to set which axis the IMU rotates around counterclockwise to get a positive output. For official sensor equipment, it is set as follows.
+Due to the special IMU (the Euler angle coordinate system is different from the acceleration and angular velocity coordinate system) of official dataset , you also need to set which axis the IMU rotates around counterclockwise to get a positive Euler angle output. For official sensor equipment, it is set as follows.
 
 ```yaml
   ## 对绝大多数IMU来说，下面三个值分别是"+z", "+y", "+x" (for most of IMUs, the following config is "+z", "+y", "+x")
@@ -162,7 +169,7 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
      <p align='center'>
          <img src="./doc/fig/handheld-official.png" alt="drawing" width="600"/>
      </p>
-    
+      
      
      <p align='center'>
          <img src="./doc/fig/handheld.png" alt="drawing" width="600"/>
