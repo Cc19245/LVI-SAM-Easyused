@@ -276,7 +276,7 @@ extrinsicTranslation: !!opencv-matrix
 
 - 我们在“**new**”分支上测试了[KAIST Complex Urban Dataset](https://sites.google.com/view/complex-urban-dataset)。 我们主要做了两个改动：
 
-  - 我们将最新版本的 LIO-SAM repo 代码更新为 LVI-SAM，因此系统更加健壮，可以在 KAIST Complex Urban Dataset 上成功运行。
+  - 我们将最新版本的 LIO-SAM 代码更新为 LVI-SAM，因此系统更加健壮，可以在 KAIST Complex Urban Dataset 上成功运行。
   - 我们从原始的 KAIST Complex Urban Dataset 生成 rosbag，并恢复 LiDAR 点云的 “ring” 和 “time” 字段。 您可以使用[doc/kaise-help](./doc/kaist-help) 中的 ros 包来生成 rosbag。
 
 - 在  KAIST Complex Urban Dataset urban26 序列上测试：
@@ -308,7 +308,7 @@ extrinsicTranslation: !!opencv-matrix
 ## 注意
 
 - 此代码只是修改了 LVI-SAM 的外参配置以便于使用，它的目的是让你更快地在其他数据集和你自己的设备上运行 LVI-SAM，所以它 **没有** 修改 LVI-SAM 的算法部分。
-- 如果你想知道我做了哪些改动以及为什么这些改动有效，你可以参考我的博客：[LVI-SAM坐标系外参分析与代码修改，以适配各种数据集](https://blog .csdn.net/qq_42731705/article/details/128344179)。
+- 如果你想知道我做了哪些改动以及为什么这些改动有效，你可以参考我的博客：[LVI-SAM坐标系外参分析与代码修改，以适配各种数据集](https://blog.csdn.net/qq_42731705/article/details/128344179)。
 - 我对 LVI-SAM 代码做了中文注释，仓库参见 [LVI-SAM-CC_Comments](https://github.com/Cc19245/LVI-SAM-CC_Comments) 。
 ---
 
