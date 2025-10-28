@@ -557,6 +557,8 @@ public:
     void publishClouds()
     {
         cloudInfo.header = cloudHeader;
+        cloudInfo.scanEndTime = timeScanNext;
+        ROS_INFO("scanEndTime: %f, timeScanCur: %f, timeScanNext: %f, cloudQueue.size(): %d", timeScanNext, timeScanCur, timeScanNext, (int)cloudQueue.size());
         cloudInfo.cloud_deskewed = publishCloud(&pubExtractedCloud, extractedCloud, cloudHeader.stamp, "base_link");
         pubLaserCloudInfo.publish(cloudInfo);
     }

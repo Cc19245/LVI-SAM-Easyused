@@ -304,3 +304,211 @@ void FeatureTracker::undistortedPoints()
     }
     prev_un_pts_map = cur_un_pts_map;
 }
+
+void yoloDetect::using_once()
+{
+    std::call_once(flag_, [this](){this->init();});
+}
+
+void yoloDetect::init()
+{
+    try
+    {
+        detectioNet = cv::dnn::readNetFromONNX(model_path);
+    }
+    catch (const cv::Exception& e)
+    {
+        ROS_ERROR("读取模型失败: %s", e.what());
+    }
+
+}
+
+dataImg yoloDetect::preprocess(cv::Mat &img)
+{
+    if (img.empty())
+    {
+        std::cout<<"lab is empty"<<std::endl;
+        return dataImg();
+    }
+
+    cv::Mat bgr_img = img.clone();
+
+    // 1.获取图像尺寸
+    int h = bgr_img.rows;
+    int w = bgr_img.cols;
+    int th = target_size;
+    int tw = target_size;
+
+    // 2.计算缩放比例
+    float scale = std::min(static_cast<float>(tw) / w, static_cast<float>(th) / h);
+    scale = std::max(scale, 0.01f);
+    int new_w = static_cast<int>(w * scale);
+    int new_h = static_cast<int>(h * scale);
+
+    // 3.缩放图像
+    cv::Mat resized_img;
+    resize(bgr_img, resized_img, cv::Size(new_w, new_h));
+
+    // 4.计算填充量
+    int padW = tw - new_w;
+    int padH = th - new_h;
+
+    int left = padW / 2;
+    int right = padW - left;
+    int top = padH / 2;
+    int bottom = padH - top;
+
+    // 5.填充图像
+    cv::Mat padded_img;
+    copyMakeBorder(resized_img, padded_img, top, bottom, left, right, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+
+    // 6.创建blob
+    cv::Mat blob = cv::dnn::blobFromImage(padded_img, 1.0/255.0, cv::Size(target_size, target_size), cv::Scalar(0,0,0), true, CV_32F);
+
+    dataImg imgdata;
+    imgdata.scale = scale;
+    imgdata.padW = padW;
+    imgdata.padH = padH;
+    imgdata.input = bgr_img.clone();
+    imgdata.blob = blob;
+
+    return imgdata;
+}
+
+void yoloDetect::draw(cv::Mat& img, Target& target)
+{
+    rectangle(img, target.box, cv::Scalar(0, 255, 0), 2);
+    std::string label = COCO_CLASSES[target.label];
+    putText(img, label, cv::Point(target.box.x, target.box.y - 5), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+}
+
+void yoloDetect::Inference(cv::Mat &img)
+{
+    if (detectioNet.empty())
+    {
+        std::cout << "模型加载失败" << std::endl;
+        return;
+    }
+
+    dataImg imgdata = preprocess(img);
+    if (imgdata.blob.empty()) {
+        std::cout << "预处理失败" << std::endl;
+        return;
+    }
+
+    detectioNet.setInput(imgdata.blob);
+    std::vector<cv::Mat> outputs;
+    std::vector<std::string> outNames = detectioNet.getUnconnectedOutLayersNames();
+    detectioNet.forward(outputs, outNames);
+
+    if (outputs.empty()) {
+        std::cout << "模型输出为空" << std::endl;
+        return;
+    }
+
+    cv::Mat output = outputs[0];
+
+    // 根据格式 float32[batch,84,anchors] 解析
+    const int batch_size = output.size[0];  // 通常是 1
+    const int num_features = output.size[1]; // 84 = 4(bbox) + 80(classes)
+    const int num_anchors = output.size[2];  // anchors 数量
+
+    std::cout << "Output shape: [" << batch_size << ", " << num_features << ", " << num_anchors << "]" << std::endl;
+
+    // 重塑为更方便处理的格式: (84, num_anchors)
+    cv::Mat output_reshaped = output.reshape(1, num_features);
+
+    PreTargets preTargets;
+
+    for (int i = 0; i < num_anchors; i++)
+    {
+        // YOLOv8 没有单独的 objectness 分数，直接使用类别分数
+        cv::Mat scores = output_reshaped.rowRange(4, num_features).col(i);
+
+        cv::Point class_id_point;
+        double max_score;
+        cv::minMaxLoc(scores, 0, &max_score, 0, &class_id_point);
+
+        if (max_score > confidence_threshold_)
+        {
+            int class_id = class_id_point.y;
+
+            // 获取边界框信息 (cx, cy, w, h) - 相对于网络输入尺寸 (640x640)
+            float cx = output_reshaped.at<float>(0, i);
+            float cy = output_reshaped.at<float>(1, i);
+            float w = output_reshaped.at<float>(2, i);
+            float h = output_reshaped.at<float>(3, i);
+
+            // 坐标映射回原始图像
+            // 注意：预处理时进行了缩放和填充，需要逆向操作
+            float cx_unpad = (cx - imgdata.padW / 2) / imgdata.scale;
+            float cy_unpad = (cy - imgdata.padH / 2) / imgdata.scale;
+            float w_unpad = w / imgdata.scale;
+            float h_unpad = h / imgdata.scale;
+
+            // 计算边界框的左上角坐标和宽高
+            int lx = static_cast<int>(cx_unpad - w_unpad / 2);
+            int ly = static_cast<int>(cy_unpad - h_unpad / 2);
+            int width = static_cast<int>(w_unpad);
+            int height = static_cast<int>(h_unpad);
+
+            // 边界检查
+            lx = std::max(0, lx);
+            ly = std::max(0, ly);
+            width = std::min(width, img.cols - lx);
+            height = std::min(height, img.rows - ly);
+
+            if (width <= 5 || height <= 5) {
+                continue;
+            }
+
+            cv::Rect box(lx, ly, width, height);
+            preTargets.boxes.push_back(box);
+            preTargets.confidences.push_back(static_cast<float>(max_score));
+            preTargets.labels.push_back(class_id);
+        }
+    }
+
+    // NMS 处理
+    std::vector<int> indices;
+    if (!preTargets.boxes.empty()) {
+        // 按类别分组进行 NMS
+        std::map<int, std::vector<int>> class_to_indices;
+        for (size_t i = 0; i < preTargets.boxes.size(); i++) {
+            class_to_indices[preTargets.labels[i]].push_back(i);
+        }
+
+        for (auto &pair : class_to_indices) {
+            std::vector<cv::Rect> class_boxes;
+            std::vector<float> class_confidences;
+            std::vector<int> class_indices;
+
+            for (int idx : pair.second) {
+                class_boxes.push_back(preTargets.boxes[idx]);
+                class_confidences.push_back(preTargets.confidences[idx]);
+                class_indices.push_back(idx);
+            }
+
+            std::vector<int> class_nms_indices;
+            cv::dnn::NMSBoxes(class_boxes, class_confidences,
+                             confidence_threshold_, nms_threshold_, class_nms_indices);
+
+            for (int nms_idx : class_nms_indices) {
+                indices.push_back(class_indices[nms_idx]);
+            }
+        }
+
+        // 绘制检测结果
+        for (auto idx : indices) {
+            Target target;
+            target.box = preTargets.boxes[idx];
+            target.confidence = preTargets.confidences[idx];
+            target.label = preTargets.labels[idx];
+            draw(img, target);
+        }
+
+        std::cout << "检测到 " << indices.size() << " 个目标" << std::endl;
+    }
+}
+
+

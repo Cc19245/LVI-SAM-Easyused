@@ -362,3 +362,64 @@ public:
         b *= 255.0;
     }
 };
+
+// COCO数据集的80个类别名称
+const std::vector<std::string> COCO_CLASSES = {
+    "person", "bicycle", "car", "motorcycle", "airplane", "bus", "train", "truck", "boat",
+    "traffic light", "fire hydrant", "stop sign", "parking meter", "bench", "bird", "cat",
+    "dog", "horse", "sheep", "cow", "elephant", "bear", "zebra", "giraffe", "backpack",
+    "umbrella", "handbag", "tie", "suitcase", "frisbee", "skis", "snowboard", "sports ball",
+    "kite", "baseball bat", "baseball glove", "skateboard", "surfboard", "tennis racket",
+    "bottle", "wine glass", "cup", "fork", "knife", "spoon", "bowl", "banana", "apple",
+    "sandwich", "orange", "broccoli", "carrot", "hot dog", "pizza", "donut", "cake",
+    "chair", "couch", "potted plant", "bed", "dining table", "toilet", "tv", "laptop",
+    "mouse", "remote", "keyboard", "cell phone", "microwave", "oven", "toaster", "sink",
+    "refrigerator", "book", "clock", "vase", "scissors", "teddy bear", "hair drier", "toothbrush"
+};
+
+struct dataImg
+{
+    cv::Mat input;
+    float scale;
+    int padW;
+    int padH;
+    cv::Mat blob;
+};
+
+struct PreTargets
+{
+    std::vector<cv::Rect> boxes;
+    std::vector<float> confidences;
+    std::vector<int> labels;
+};
+
+struct Target
+{
+    cv::Rect box;
+    float confidence;
+    int label;
+};
+
+class yoloDetect {
+public:
+    explicit yoloDetect()
+    {
+        using_once();
+    }
+
+    void using_once();
+    void init();
+
+    dataImg preprocess(cv::Mat &img);
+    void Inference(cv::Mat &img);
+    void draw(cv::Mat& img, Target& target);
+
+private:
+    int target_size = 640;
+    double confidence_threshold_ = 0.3;
+    double nms_threshold_ = 0.3;
+    std::once_flag flag_;
+    cv::dnn::Net detectioNet;
+    std::string model_path = "/LVI-SAM/ls_ws/src/LVI-SAM-Easyused/LVI-SAM-Easyused-master/model/yolov8n.onnx";
+};
+

@@ -41,4 +41,10 @@
   <build_depend>GTSAM</build_depend>
   <run_depend>GTSAM</run_depend>
 
+  <!-- Additional runtime/build deps used by the scan_to_map node -->
+  <build_depend>pcl_ros</build_depend>
+  <run_depend>pcl_ros</run_depend>
+  <build_depend>ceres-solver</build_depend>
+  <run_depend>ceres-solver</run_depend>
+
 </package>

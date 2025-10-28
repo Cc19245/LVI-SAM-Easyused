@@ -106,7 +106,7 @@ public:
         priorPoseNoise = gtsam::noiseModel::Diagonal::Sigmas((gtsam::Vector(6) << 1e-2, 1e-2, 1e-2, 1e-2, 1e-2, 1e-2).finished()); // rad,rad,rad,m, m, m
         priorVelNoise = gtsam::noiseModel::Isotropic::Sigma(3, 1e2);                                                               // m/s
         priorBiasNoise = gtsam::noiseModel::Isotropic::Sigma(6, 1e-3);                                                             // 1e-2 ~ 1e-3 seems to be good
-        correctionNoise = gtsam::noiseModel::Isotropic::Sigma(6, 1e-2);                                                            // meter
+        correctionNoise = gtsam::noiseModel::Isotropic::Sigma(6, 1e-1);                                                            // meter, set to low weight for scan-to-map
         noiseModelBetweenBias = (gtsam::Vector(6) << imuAccBiasN, imuAccBiasN, imuAccBiasN, imuGyrBiasN, imuGyrBiasN, imuGyrBiasN).finished();
 
         imuIntegratorImu_ = new gtsam::PreintegratedImuMeasurements(p, prior_imu_bias); // setting up the IMU integration for IMU message thread
@@ -137,6 +137,19 @@ public:
     void odometryHandler(const nav_msgs::Odometry::ConstPtr &odomMsg)
     {
         double currentCorrectionTime = ROS_TIME(odomMsg);
+        ROS_INFO("currentCorrectionTime = %f", currentCorrectionTime);
+
+        static double prevCorrectionTime = -1;
+        if (prevCorrectionTime > 0 && currentCorrectionTime <= prevCorrectionTime) {
+            double time_diff = prevCorrectionTime - currentCorrectionTime;
+            if (time_diff > 1.0) {  // 允许 1s 内的跳跃
+                ROS_WARN("Non-monotonic odometry time: %f <= %f, diff=%.6f, skipping", currentCorrectionTime, prevCorrectionTime, time_diff);
+                return;
+            } else {
+                ROS_WARN("Small non-monotonic time diff: %.6f, continuing", time_diff);
+            }
+        }
+        prevCorrectionTime = currentCorrectionTime;
 
         // make sure we have imu data to integrate
         if (imuQueOpt.empty())
@@ -256,6 +269,11 @@ public:
         }
         // add imu factor to graph
         const gtsam::PreintegratedImuMeasurements &preint_imu = dynamic_cast<const gtsam::PreintegratedImuMeasurements &>(*imuIntegratorOpt_);
+        ROS_INFO("deltaTij = %f", imuIntegratorOpt_->deltaTij());
+        if (imuIntegratorOpt_->deltaTij() == 0) {
+            ROS_WARN("deltaTij = 0, skipping IMU factor");
+            return;
+        }
         gtsam::ImuFactor imu_factor(X(key - 1), V(key - 1), X(key), V(key), B(key - 1), preint_imu);
         graphFactors.add(imu_factor);
         // add imu bias between factor
@@ -311,7 +329,6 @@ public:
                 sensor_msgs::Imu *thisImu = &imuQueImu[i];
                 double imuTime = ROS_TIME(thisImu);
                 double dt = (lastImuQT < 0) ? (1.0 / 500.0) : (imuTime - lastImuQT);
-
                 imuIntegratorImu_->integrateMeasurement(gtsam::Vector3(thisImu->linear_acceleration.x, thisImu->linear_acceleration.y, thisImu->linear_acceleration.z),
                                                         gtsam::Vector3(thisImu->angular_velocity.x, thisImu->angular_velocity.y, thisImu->angular_velocity.z), dt);
                 lastImuQT = imuTime;

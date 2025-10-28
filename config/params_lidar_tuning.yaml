@@ -1,0 +1,32 @@
+# Tuning params for IMU preintegration timing and numeric safety
+# Load this file with rosparam (e.g. in your launch file) to override defaults in code.
+
+lvi_sam:
+  # imu_time_tolerance (seconds)
+  # Accept small "late" IMU samples relative to correction time. Negative means we accept IMU
+  # with timestamp up to |imu_time_tolerance| seconds after correction time (useful when IMU
+  # timestamps are slightly later than lidar/odom timestamps). Default in code: -0.002
+  imu_time_tolerance: -0.002
+
+  # preint_dt_floor (seconds)
+  # Minimum deltaT below which preintegration is considered too small to be reliable. When
+  # actual preintegration deltaT <= preint_dt_floor the node will avoid adding degenerate
+  # IMU/Between factors and use mild priors instead. Default in code: 1e-4
+  preint_dt_floor: 1e-4
+
+  # min_bias_sigma
+  # Per-component minimum standard deviation (sigma) for the bias-between factor. This avoids
+  # zero or near-zero sigmas which create singular information matrices for GTSAM. Default: 1e-5
+  min_bias_sigma: 1e-5
+
+  # Suggested tuning for priors (experiment with these if you see large jumps):
+  # prior_vel_sigma: standard deviation (m/s) for initial velocity prior (default in code: 1.0)
+  prior_vel_sigma: 1.0
+  # prior_bias_sigma: standard deviation for bias prior components (default in code: 1e-2)
+  prior_bias_sigma: 1e-2
+
+# Usage:
+# In your launch file, add:
+#   <rosparam command="load" file="$(find LVI-SAM-Easyused)/config/params_lidar_tuning.yaml"/>
+# or run:
+#   rosparam load $(rospack find LVI-SAM-Easyused)/config/params_lidar_tuning.yaml

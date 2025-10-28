@@ -13,7 +13,7 @@
 #include <sensor_msgs/image_encodings.h>
 #include <nav_msgs/Odometry.h>
 
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
 #include <cv_bridge/cv_bridge.h>
 
 #include <pcl/point_cloud.h>

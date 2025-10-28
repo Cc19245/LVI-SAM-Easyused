@@ -26,6 +26,9 @@ float32 odomYaw
 # Odometry reset ID
 int64 odomResetId
 
+# Scan end time for odometry timestamp
+float64 scanEndTime
+
 # Point cloud messages
 sensor_msgs/PointCloud2 cloud_deskewed  # original cloud deskewed
 sensor_msgs/PointCloud2 cloud_corner    # extracted corner feature

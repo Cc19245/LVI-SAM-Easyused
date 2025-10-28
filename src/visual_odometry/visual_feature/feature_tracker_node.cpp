@@ -1,7 +1,8 @@
 #include "feature_tracker.h"
+#include <opencv2/dnn.hpp>
+#include <opencv2/imgproc.hpp>
 
 #define SHOW_UNDISTORTION 0
-
 
 // mtx lock for two threads
 std::mutex mtx_lidar;
@@ -29,7 +30,8 @@ bool first_image_flag = true;
 double last_image_time = 0;
 bool init_pub = 0;
 
-
+// yoloDetect* detect = new yoloDetect();
+cv::Mat pub_img;
 
 void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
 {
@@ -189,11 +191,14 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
         {
             ptr = cv_bridge::cvtColor(ptr, sensor_msgs::image_encodings::RGB8);
             //cv::Mat stereo_img(ROW * NUM_OF_CAM, COL, CV_8UC3);
-            cv::Mat stereo_img = ptr->image;
+            pub_img = ptr->image;
+
+            ROS_INFO("Load the model.");
+            // detect->Inference(pub_img);
 
             for (int i = 0; i < NUM_OF_CAM; i++)
             {
-                cv::Mat tmp_img = stereo_img.rowRange(i * ROW, (i + 1) * ROW);
+                cv::Mat tmp_img = pub_img.rowRange(i * ROW, (i + 1) * ROW);
                 cv::cvtColor(show_img, tmp_img, CV_GRAY2RGB);
 
                 for (unsigned int j = 0; j < trackerData[i].cur_pts.size(); j++)
@@ -216,7 +221,8 @@ void img_callback(const sensor_msgs::ImageConstPtr &img_msg)
                 }
             }
 
-            pub_match.publish(ptr->toImageMsg());
+            sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", pub_img).toImageMsg();
+            pub_match.publish(msg);
         }
     }
 }
@@ -349,8 +355,7 @@ void lidar_callback(const sensor_msgs::PointCloud2ConstPtr& laser_msg)
     *depthCloud = *depthCloudDS;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     // initialize ROS node
     ros::init(argc, argv, "vins");
     ros::NodeHandle n;

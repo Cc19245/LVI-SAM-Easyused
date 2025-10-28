@@ -317,3 +317,62 @@ Due to the special IMU (the Euler angle coordinate system is different from the 
 ## Acknowledgement
 
 - Origin official [LVI-SAM](https://github.com/TixiaoShan/LVI-SAM).
+
+---
+
+## 添加的 scan_to_map 节点 — 编译与运行说明（我已把源文件和 launch 放入仓库，但未编译）
+
+我已将一个最小化的 LOAM-style scan-to-map 优化器（角点/面点 + LM）添加到本仓库，用于快速验证与二次开发：
+
+- 源文件：`src/lidar_odometry/scan_to_map.cpp`
+- 启动文件：`launch/kitti_scan_to_map.launch`（默认会加载 `config/KITTI_lidar.yaml` 与 `config/KITTI_camera.yaml`）
+
+下面给出如何在本地把该文件编译进 `lvi_sam` 包的精确说明（我已在仓库中做了最小的 CMake/package 修改，但我**没有**在容器中编译）：
+
+1) CMakeLists.txt 中的可执行目标（仓库已包含以下块）：
+
+```cmake
+# Scan-to-map minimal node (LOAM-style optimizer)
+add_executable(${PROJECT_NAME}_scan_to_map src/lidar_odometry/scan_to_map.cpp)
+add_dependencies(${PROJECT_NAME}_scan_to_map ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
+target_compile_options(${PROJECT_NAME}_scan_to_map PRIVATE ${OpenMP_CXX_FLAGS})
+target_link_libraries(${PROJECT_NAME}_scan_to_map PRIVATE ${catkin_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBRARIES} ${OpenMP_CXX_FLAGS} gtsam Boost::timer)
+```
+
+2) `package.xml` 中需要（仓库已追加）声明的依赖示例：
+
+```xml
+  <build_depend>pcl_ros</build_depend>
+  <run_depend>pcl_ros</run_depend>
+  <build_depend>ceres-solver</build_depend>
+  <run_depend>ceres-solver</run_depend>
+```
+
+注意：不同 ROS 发行版或 OS 上 package 名称可能稍有差异（例如在 Debian/Ubuntu 上是 `libceres-dev` 等），如果你在编译时遇到找不到包或找不到库，请按系统提示安装对应的系统/ROS 包。
+
+3) 推荐的本地编译步骤（示例，catkin 工作区）
+
+```bash
+cd /home/what/ros_ws/LVI_ws
+catkin_make
+source devel/setup.bash
+```
+
+4) 运行（KITTI 示例）
+
+```bash
+rosparam set /use_sim_time true
+# 在另一个终端回放 kitti bag： rosbag play /path/to/kitti.bag --clock
+roslaunch LVI-SAM-Easyused kitti_scan_to_map.launch
+```
+
+5) 常见问题与排查建议
+
+- 如果出现找不到 `lvi_sam::cloud_info` 的 topic/type，先确保 `imageProjection` 与 `featureExtraction` 节点已启动（它们负责发布 `PROJECT_NAME/lidar/feature/cloud_info`）。
+- 如果链接错误提示找不到 gtsam/ceres/PCL 库，请先确认系统已安装对应开发包，例如（Ubuntu + ROS）：
+  ```bash
+  sudo apt install -y libceres-dev libgtsam-dev ros-${ROS_DISTRO}-pcl-ros
+  ```
+- 若编译失败且错误不明显，把 `catkin_make` 的完整输出贴给我，我可以基于错误信息给出精确修复补丁。
+
+如果你同意我现在将继续保持“不编译”的状态，但可以帮你完成后续的本地编译或修复工作，请回复 `A`（我将执行编译并修复编译错误）。如需我撤回 `package.xml` 的依赖修改，也请说明。

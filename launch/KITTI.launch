@@ -11,4 +11,8 @@
     <include file="$(find lvi_sam)/launch/include/module_rviz.launch" />
     <!--- SAM -->
     <include file="$(find lvi_sam)/launch/include/module_sam.launch" />
+    
+    <!-- scan_to_map: LOAM-style scan2map optimizer (added for KITTI runs) -->
+    <node name="scan_to_map" pkg="lvi_sam" type="lvi_sam_scan_to_map" output="screen">
+    </node>
 </launch>
